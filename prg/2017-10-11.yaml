@@ -1,0 +1,59 @@
+gym: Portland Rock Gym
+date: 2017-10-11
+walls:
+  - name: Catcher's Mitt
+    height: 12
+    routes:
+      - color: Tan
+        grade: V5
+        setter: 
+        stars: 3
+      - color: TBD
+        grade: V3
+        setter: TBD
+        stars: 
+  - name: Mushroom
+    height: 12
+    routes:
+      - color: Green
+        grade: V2
+        setter: 
+        stars: 4
+      - color: Green
+        grade: V3
+        setter: 
+        stars: 3
+      - color: White
+        grade: V3
+        setter: 
+        stars: 3
+      - color: Yellow
+        grade: V5
+        setter: 
+        stars: 3
+        attempts: 2
+      - color: Blue
+        grade: V4
+        setter: Andre Hoyos
+        stars: 3
+        attempts: 4
+      - color: Black
+        grade: V7
+        setter: Andre Hoyos
+        stars: 3
+        attempts: 8
+      - color: Pink
+        grade: V6
+        setter: Leah Bell-Johnson
+        stars: 3
+        attempts: 3
+      - color: Orange
+        grade: V7
+        setter: Sean Harris
+        stars: 4
+        attempts: 6
+      - color: Blue
+        grade: V8
+        setter: Andre Hoyos
+        stars: 4
+        attempts: 15

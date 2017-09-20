@@ -1,0 +1,58 @@
+gym: Portland Rock Gym
+date: 2017-08-23
+walls:
+  - name: Catcher's Mitt
+    height: 12
+    routes:
+      - color: White
+        grade: V5
+        setter: Anonymous
+        stars: 2
+      - color: Yellow
+        grade: V3
+        setter: Leah Bell-Johnson
+        stars: 3
+  - name: Mushroom
+    height: 12
+    routes:
+      - color: Yellow
+        grade: V7
+        setter: Griffin Fuller
+        stars: 1
+        attempts: 20
+        sessions: 2
+      - color: Orange
+        grade: V5
+        setter: Andre Hoyos
+        stars: 3
+      - color: Green
+        grade: V6
+        setter: Sean Harris
+        stars: 4
+      - color: Purple
+        grade: V5
+        setter: Leah Bell-Johnson
+        stars: 2
+      - color: Grey
+        grade: V8
+        setter: Sean Harris
+        stars: 5
+        attempts: 7
+      - color: Green
+        grade: V8
+        setter: Griffin Fuller
+        stars: 4
+        attempts: 3
+      - color: Red
+        grade: V7
+        setter: Ben McCullen
+        stars: 4
+        attempts: 6
+      - color: Blue
+        grade: V3
+        setter: Sean Harris
+        stars: 3
+      - color: Red
+        grade: V4
+        setter: Griffin Fuller
+        stars: 3

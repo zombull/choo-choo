@@ -1,0 +1,73 @@
+gym: Portland Rock Gym
+date: 2017-08-30
+walls:
+  - name: East Arch
+    height: 18
+    routes:
+      - color: Green
+        grade: V9
+        setter: Sean Harris
+        stars: 5
+        attempts: 20
+        sessions: 3
+        comments: Injured left middle finger, overcommitted on the crux and attempt to hold the swing on a half-crimp-pinch.  Sent a few weeks later.
+      - color: Brown
+        grade: V4
+        setter: Andre Hoyos
+        stars: 3
+      - color: Blue
+        grade: V6
+        setter: Andre Hoyos
+        stars: 4
+      - color: Black
+        grade: V5
+        setter: Griffin Fuller
+        stars: 3
+      - color: Orange
+        grade: V6
+        setter: Anonymous
+        stars: 2
+        attempts: 2
+      - color: Orange
+        grade: V4
+        setter: Anonymous
+        stars: 4
+      - color: Yellow
+        grade: V8
+        setter: Sean Harris
+        stars: 3
+      - color: Pink
+        grade: V3
+        setter: Sean Harris
+        stars: 3
+  - name: Mandala
+    height: 18
+    routes:
+      - color: Blue
+        grade: V3
+        setter: Andre Hoyos
+        stars: 3
+      - color: Yellow
+        grade: V3
+        setter: Sean Harris
+        stars: 4
+      - color: Orange
+        grade: V5
+        setter: Andre Hoyos
+        stars: 4
+      - color: Purple
+        grade: V7
+        setter: Griffin Fuller
+        stars: 3
+        attempts: 7
+  - name: North Face
+    height: 18
+    routes:
+      - color: Pink
+        grade: V5
+        setter: Andre Hoyos
+        stars: 3
+      - color: White
+        grade: V5
+        setter: Griffin Fuller
+        stars: 3

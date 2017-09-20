@@ -1,0 +1,20 @@
+gym: Portland Rock Gym
+date: 2017-08-14
+walls:
+  - name: "45"
+    height: 12
+    routes:
+      - color: Red
+        grade: V5
+        setter: Leah Bell-Johnson
+        stars: 4
+      - color: Yellow
+        grade: V8
+        setter: Andre Hoyos
+        stars: 4
+        attempts: 15
+        sessions: 2
+      - color: Pink
+        grade: V6
+        setter: Sean Harris
+        stars: 4

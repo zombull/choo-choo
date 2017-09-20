@@ -1,0 +1,34 @@
+gym: Portland Rock Gym
+location: Portland, OR
+url: https://portlandrockgym.com
+map: https://www.google.com/maps/place/Portland+Rock+Gym+Inc/@45.523217,-122.6560557,17z/data=!3m1!4b1!4m5!3m4!1s0x5495a0a53f77ef67:0xda1ce9c335132c83!8m2!3d45.523217!4d-122.653867
+walls:
+  - name: West Wall
+  - name: East Wall
+  - name: Island West
+  - name: Island East
+  - name: "45"
+  - name: Catcher's Mitt
+  - name: Mushroom
+  - name: South Prow
+  - name: South Face
+  - name: South Eldo
+  - name: West Eldo
+  - name: East Arch
+  - name: West Arch
+  - name: Mandala
+  - name: North Face
+setters:
+  - name: Anonymous
+  - name: Sean Harris
+  - name: Griffin Fuller
+  - name: Andre Hoyos
+  - name: Leah Bell-Johnson
+  - name: Celina G
+  - name: Jonah Perkins
+  - name: Ben McCullen
+  - name: Ben Wilson
+  - name: Anna P
+  - name: Elliot
+  - name: Richard Douglas
+  - name: Emmerson Donnel

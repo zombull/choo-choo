@@ -1,0 +1,58 @@
+gym: Portland Rock Gym
+date: 2017-08-02
+walls:
+  - name: West Wall
+    height: 12
+    routes:
+      - color: Blue
+        grade: V4
+        setter: Leah Bell-Johnson
+        stars: 3
+        comment: 5 star eliminate that goes at ~V6
+      - color: Purple
+        grade: V5
+        setter: Leah Bell-Johnson
+        stars: 2
+      - color: Red
+        grade: V8
+        setter: Anonymous
+        stars: 3
+        attemps: 4
+      - color: Teal
+        grade: V4
+        setter: Griffin Fuller
+        stars: 3
+      - color: Green
+        grade: V8
+        setter: Andre Hoyos
+        stars: 4
+        attempts: 2
+      - color: Purple
+        grade: V6
+        setter: Sean Harris
+        stars: 2
+      - color: Yellow
+        grade: V6
+        setter: Griffin Fuller
+        stars: 5
+      - color: Brown
+        grade: V5
+        setter: Griffin Fuller
+        stars: 3
+      - color: Orange
+        grade: V3
+        setter: Leah Bell-Johnson
+        stars: 3
+      - color: Pink
+        grade: V6
+        setter: Leah Bell-Johnson
+        stars: 4
+        comment: stiff
+      - color: Brown
+        grade: V3
+        setter: Andre Hoyos
+        stars: 3
+      - color: Orange
+        grade: V3
+        setter: Leah Bell-Johnson
+        stars: 2

@@ -1,0 +1,67 @@
+gym: Portland Rock Gym
+date: 2017-09-06
+walls:
+  - name: West Arch
+    height: 18
+    routes:
+      - color: Red
+        grade: V5
+        setter: Sean Harris
+        stars: 4
+        comment: Extension to V3
+      - color: Brown
+        grade: V5
+        setter: Griffin Fuller
+        stars: 4
+      - color: Purple
+        grade: V9
+        setter: Griffin Fuller
+        stars: 4
+      - color: Orange
+        grade: V7
+        setter: Andre Hoyos
+        stars: 4
+        attempts: 6
+  - name: South Prow
+    height: 18
+    routes:
+      - color: Pink
+        grade: V6
+        setter: Andre Hoyos
+        stars: 3
+        attempts: 6
+      - color: Orange
+        grade: V3
+        setter: Jonah Perkins
+        stars: 4
+      - color: Yellow
+        grade: V6
+        setter: Richard Douglas
+        stars: 4
+      - color: Green
+        grade: V6
+        setter: Anonymous
+        stars: 3
+      - color: Teal
+        grade: V5
+        setter: Sean Harris
+        stars: 3
+  - name: South Face
+    height: 18
+    routes:
+      - color: White
+        grade: V4
+        setter: Sean Harris
+        stars: 2
+      - color: Yellow
+        grade: V4
+        setter: Griffin Fuller
+        stars: 3
+      - color: Black
+        grade: V3
+        setter: Richard Douglas
+        stars: 3
+      - color: Green
+        grade: V7
+        setter: Andre Hoyos
+        stars: 4

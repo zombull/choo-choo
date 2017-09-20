@@ -1,0 +1,44 @@
+gym: Portland Rock Gym
+date: 2017-08-09
+walls:
+  - name: South Eldo
+    height: 18
+    routes:
+      - color: Green
+        grade: V3
+        setter: Anonymous
+        stars: 3
+      - color: Blue
+        grade: V5
+        setter: Anna P
+        stars: 2
+      - color: White
+        grade: V4
+        setter: Andre Hoyos
+        stars: 3
+      - color: Yellow
+        grade: V5
+        setter: Andre Hoyos
+        stars: 3
+      - color: Brown
+        grade: V3
+        setter: Jonah Perkins
+        stars: 3
+      - color: Black
+        grade: V5
+        setter: Elliot
+        stars: 2
+        attempts: 2
+      - color: Pink
+        grade: V7
+        setter: Emmerson Donnel
+        stars: 3
+        attempts: 2
+      - color: Blue
+        grade: V4
+        setter: Leah Bell-Johnson
+        stars: 4
+      - color: Green
+        grade: V6
+        setter: Celina G
+        stars: 3

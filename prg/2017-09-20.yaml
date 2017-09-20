@@ -1,0 +1,70 @@
+gym: Portland Rock Gym
+date: 2017-09-20
+walls:
+  - name: East Wall
+    height: 12
+    routes:
+      - color: Yellow
+        grade: V6
+        setter: Sean Harris
+        stars: 4
+      - color: Blue
+        grade: V5
+        setter: Sean Harris
+        stars: 3
+      - color: Purple
+        grade: V6
+        setter: Sean Harris
+        stars: 4
+        attempts: 2
+        comment: slab.  similar skill set to French Press.  LOL V7
+      - color: White
+        grade: V3
+        setter: Sean Harris
+        stars: 4
+      - color: Orange
+        grade: V3
+        setter: Sean Harris
+        stars: 2
+      - color: Yellow
+        grade: V4
+        setter: Andre Hoyos
+        stars: 4
+      - color: Green
+        grade: V8
+        setter: Andre Hoyos
+        stars: 4
+        attempts: 6
+      - color: Pink
+        grade: V8
+        setter: Sean Harris
+        stars: 2
+        attempts: 3
+      - color: Yellow
+        grade: V7
+        setter: Griffin Fuller
+        stars: 1
+        attempts: 10
+      - color: Black
+        grade: V3
+        setter: Anonymous
+        stars: 3
+      - color: Pink
+        grade: V3
+        setter: Ben Wilson
+        stars: 2
+      - color: Pink
+        grade: V3
+        setter: Griffin Fuller
+        stars: 2
+      - color: Green
+        grade: V3
+        setter: Griffin Fuller
+        stars: 3
+      - color: Teal
+        grade: V9
+        setter: Griffin Fuller
+        stars: 5
+        comment: Ran it with Griffin.  Key to crux was to go straight to right foot on cut instead of left-then-swap.
+        attempts: 10
+        sessions: 2
