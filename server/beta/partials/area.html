@@ -1,0 +1,57 @@
+<md-content layout-align="center" flex class="md-default-theme" ng-cloak>
+    <div ng-if="area && !error">
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2><div>{{::area.name}}</div></h2>
+            <md-divider></md-divider><br>
+
+            <table cellpadding="0" cellspacing="0">
+                <tbody>
+                    <tr><td valign="top">Crag</td><td ng-bind-html="::area.crag | linkify"></td></tr>
+                    <tr ng-if="::area.area">
+                        <td valign="top">Area</td><td ng-bind-html="::area.area | linkify"></td>
+                    </tr>
+                    <tr ng-if="::area.links.length">
+                        <td valign="top">Links</td><td><div ng-repeat="link in ::area.links track by link.url" ng-bind-html="::link | linkify:true"></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-subheader>
+
+         <md-subheader class="md-no-sticky md-accent" ng-if="::area.climbingAreas" ng-cloak>
+            <h3>
+                <div>Areas</div>
+            </h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.climbingAreas track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="::area.boulderingAreas" ng-cloak>
+            <h3>
+                <div>Boulders</div>
+            </h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.boulderingAreas track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="::area.routes" ng-cloak>
+            <h3><div>Routes</div></h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.routes track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="::area.problems" ng-cloak>
+            <h3><div>Problems</div></h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.problems track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+    </div>
+    <div class="layout" ng-if="error" ng-include="'partials/error.html'"></div>
+</md-content>

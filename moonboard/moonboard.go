@@ -132,15 +132,12 @@ func SetId(d *database.Database) int64 {
 func InsertProblem(d *database.Database, r *database.Route) {
 	bug.On(r.CragId != Id(d) || r.Type != "moonboard", "invalid call to moonboard.InsertProblem")
 
-	r.Length = 12
-	r.Pitches = 1
-
 	h := database.Holds{
 		RouteId: r.Id,
 	}
 
 	var setter string
-	h.Holds, setter = getHolds(r)
+	h.Holds, setter, r.Pitches = getProblemDetails(r)
 	bug.On(len(h.Holds) == 0, fmt.Sprintf("failed to parse holds for Moonboard problem '%s'", r.Name))
 	bug.On(len(setter) == 0, fmt.Sprintf("failed to parse setter for Moonboard problem '%s'", r.Name))
 
@@ -196,7 +193,7 @@ func searchWebSite(query, prefix string) (map[string]string, []string) {
 					if a.Key == "href" {
 						if strings.HasPrefix(a.Val, prefix) {
 							href = a.Val
-						} else if ui, ok := regexParseUint(numSearchPagesRegex, a.Val); ok && pages < ui {
+						} else if ui, ok := regexParseUint(numSearchPagesRegex, a.Val, false); ok && pages < ui {
 							pages = ui
 						}
 					} else if a.Key == "rel" && a.Val == "bookmark" {
@@ -227,13 +224,18 @@ func regexFindGroup(r *regexp.Regexp, s string) (string, bool) {
 	return "", false
 }
 
-func regexParseUint(r *regexp.Regexp, s string) (uint, bool) {
+func regexParseUint(r *regexp.Regexp, s string, optional bool) (uint, bool) {
 	if g, ok := regexFindGroup(r, s); ok {
 		i, err := strconv.ParseUint(g, 10, 64)
-		if err != nil || i == 0 {
-			fmt.Println("Bad data in comment section, falling back to log")
-			return 0, false
+		if optional {
+			if err != nil || i == 0 {
+				fmt.Println("Bad data in comment section, falling back to log")
+				return 0, false
+			}
+		} else {
+			bug.OnError(err)
 		}
+
 		return uint(i), true
 	}
 	return 0, false
@@ -248,7 +250,9 @@ var commentRegex = regexp.MustCompile(`Comment: ([[:ascii:]]+)`)
 
 var shortlinkRegex = regexp.MustCompile(`^[0-9]+$`)
 var numTriesRegex = regexp.MustCompile(`Number of tries: ([0-9A-Za-z ]+)`)
-var gradeRatingRegex = regexp.MustCompile(`Grade rating: ([0-9A-Za-z \+]+)`)
+var gradeRatingRegex = regexp.MustCompile(`Grade rating: ([0-9A-Ca-c\+]+)`)
+var gradeRegex = regexp.MustCompile(`Grade : ([0-9A-Ca-c\+]+)`)
+var repeatsRegex = regexp.MustCompile(`Grade : ([0-9A-Ca-c\+]+)`)
 var starRatingRegex = regexp.MustCompile(`Star rating: ([0-9]+) stars`)
 var dateClimbedRegex = regexp.MustCompile(`Date climbed: ([0-9\/]+)`)
 
@@ -281,25 +285,25 @@ func insertRouteAndTick(d *database.Database, tickUrl string, body io.Reader) {
 		} else if tt == html.TextToken {
 			t := z.Token()
 
-			if ui, ok := regexParseUint(attemptsRegex, t.Data); ok {
+			if ui, ok := regexParseUint(attemptsRegex, t.Data, true); ok {
 				tick.Attempts = ui
 			} else if s, ok := regexFindGroup(numTriesRegex, t.Data); ok && tick.Attempts == 0 {
 				tick.Attempts, ok = triesToAttempts[s]
 				bug.On(!ok, fmt.Sprintf("Unhandled case in 'Number of tries': %s", s))
 			}
-			if ui, ok := regexParseUint(sessionsRegex, t.Data); ok {
+			if ui, ok := regexParseUint(sessionsRegex, t.Data, true); ok {
 				tick.Sessions = ui
 			}
-			if ui, ok := regexParseUint(starsRegex, t.Data); ok {
+			if ui, ok := regexParseUint(starsRegex, t.Data, true); ok {
 				route.Stars = ui
-			} else if ui, ok := regexParseUint(starRatingRegex, t.Data); ok && route.Stars == 0 {
+			} else if ui, ok := regexParseUint(starRatingRegex, t.Data, false); ok && route.Stars == 0 {
 				route.Stars = ui + 1
 			}
 			if s, ok := regexFindGroup(commentRegex, t.Data); ok {
 				tick.Comment = s
 			}
 			if s, ok := regexFindGroup(gradeRatingRegex, t.Data); ok {
-				route.Grade, ok = database.FontainebleauToHueco[s]
+				route.Grade, ok = database.FontainebleauToHueco[strings.ToUpper(s)]
 				bug.On(!ok, fmt.Sprintf("Unhandled case in 'Grade rating': %s", s))
 			}
 			if s, ok := regexFindGroup(dateClimbedRegex, t.Data); ok {
@@ -349,7 +353,7 @@ func insertRouteAndTick(d *database.Database, tickUrl string, body io.Reader) {
 		} else {
 			route = existing
 		}
-		fmt.Printf("Problem"+database.FORMAT_ROUTE, route.Name, route.Type, route.Grade, route.Stars, route.Length, route.Pitches, "meh", route.Url, route.Comment)
+		fmt.Printf("Problem"+database.FORMAT_ROUTE, route.Name, route.Type, route.Grade, route.Stars, route.Length, route.Pitches, route, route.Url, route.Comment)
 
 		tick.RouteId = route.Id
 		d.Insert(tick)
@@ -399,9 +403,10 @@ func QueryProblems(name string) map[string]string {
 	return m
 }
 
-var setterRegex = regexp.MustCompile(`Set by : ([0-9A-Za-z_ ]+)`)
+var setterRegex = regexp.MustCompile(`Set by : (.+)`)
+var ascentsRegex = regexp.MustCompile(`([0-9]+) climbers have repeated this problem`)
 
-func getHolds(route *database.Route) (map[string]string, string) {
+func getProblemDetails(route *database.Route) (map[string]string, string, uint) {
 	c := &http.Client{Timeout: time.Second * 30}
 
 	r, err := c.Get(route.Url)
@@ -410,6 +415,7 @@ func getHolds(route *database.Route) (map[string]string, string) {
 
 	s := ""
 	m := make(map[string]string)
+	ascents := -1
 
 	z := html.NewTokenizer(r.Body)
 	for {
@@ -420,6 +426,15 @@ func getHolds(route *database.Route) (map[string]string, string) {
 			t := z.Token()
 			if g, ok := regexFindGroup(setterRegex, t.Data); ok {
 				s = g
+			} else if t.Data == "Be the first to repeat this problem" {
+				bug.On(ascents > 0, "Duplicate matches for number of ascents")
+				ascents = 0
+			} else if t.Data == "1 climber has repeated this problem" {
+				bug.On(ascents != 1 && ascents >= 0, "Duplicate matches for number of ascents")
+				ascents = 1
+			} else if ui, ok := regexParseUint(ascentsRegex, t.Data, false); ok {
+				bug.On(ascents != int(ui) && ascents >= 0, "Duplicate matches for number of ascents")
+				ascents = int(ui)
 			}
 		} else if tt == html.SelfClosingTagToken {
 			t := z.Token()
@@ -451,10 +466,10 @@ func getHolds(route *database.Route) (map[string]string, string) {
 						key = k
 					}
 				} else if a.Key == "name" {
-					name = a.Val
+					name = strings.TrimSpace(a.Val)
 				}
 			}
-			if key != "" && name != "" {
+			if len(key) > 0 && len(name) > 0 {
 				if len(name) != 2 && len(name) != 3 {
 					for _, a := range t.Attr {
 						fmt.Printf("ATTR: %s=%s\n", a.Key, a.Val)
@@ -465,5 +480,109 @@ func getHolds(route *database.Route) (map[string]string, string) {
 			}
 		}
 	}
-	return m, s
+	bug.On(len(s) == 0, fmt.Sprintf("Failed to identify setter for %s", route.Url))
+	bug.On(ascents < 0, "Failed to find number of ascents")
+	return m, s, uint(ascents)
+}
+
+func SyncIndex(d *database.Database, body io.Reader) {
+	if !SetDefined() {
+		return
+	}
+
+	route := &database.Route{
+		CragId: Id(d),
+		AreaId: SetId(d),
+		Type:   "moonboard",
+		Stars:  10,
+	}
+
+	isProblem := false
+	problemId := ""
+
+	z := html.NewTokenizer(body)
+	for {
+		tt := z.Next()
+		if tt == html.ErrorToken {
+			break
+		} else if tt == html.TextToken {
+			if !isProblem {
+				continue
+			}
+			t := z.Token()
+
+			if s, ok := regexFindGroup(gradeRegex, t.Data); ok {
+				route.Grade, ok = database.FontainebleauToHueco[strings.ToUpper(s)]
+				bug.On(!ok, fmt.Sprintf("Unhandled case in 'Grade': %s", s))
+			}
+		} else if tt == html.StartTagToken {
+			t := z.Token()
+
+			if t.Data == "div" {
+				bug.On(isProblem, "Unexpected DIV found while parsing problem")
+
+				for _, a := range t.Attr {
+					if a.Key == "problem-id" {
+						isProblem = true
+						problemId = a.Val
+					} else if a.Key == "star-val" {
+						ui, err := strconv.ParseUint(a.Val, 10, 64)
+						bug.OnError(err)
+						route.Stars = uint(ui)
+					}
+				}
+			} else if t.Data == "a" {
+				href := ""
+				title := ""
+				isPound := false
+				isPopup := false
+				for _, a := range t.Attr {
+					if a.Key == "href" && a.Val == "#" {
+						isPound = true
+					} else if a.Key == "class" && a.Val == "problemPopup" {
+						isPopup = true
+					} else if a.Key == "rel" && shortlinkRegex.MatchString(a.Val) {
+						bug.On(a.Val != problemId, "DIV problem id does not match A problem id")
+						href = fmt.Sprintf("https://www.moonboard.com/?p=%s", a.Val)
+					} else if a.Key == "title" {
+						title = a.Val
+						if problemId == "220822" {
+							title = "maggie mcgeady's untitled miracle"
+						}
+					}
+				}
+				bug.On((isPopup && isPound && isProblem) != ((isPopup && isPound) || isProblem), "Inconsistency in Moonboard HTML")
+				route.Url = href
+				route.Name = title
+			}
+		} else if tt == html.EndTagToken {
+			if !isProblem || z.Token().Data != "div" {
+				continue
+			}
+			bug.On(len(route.Name) == 0, "Found Moonboard problem, failed to parse name")
+			bug.On(route.Stars == 10, "Found Moonboard problem, failed to parse number of stars")
+			bug.On(len(route.Grade) == 0, "Found Moonboard problem, failed to parse grade")
+
+			existing := d.FindRoute(route.AreaId, route.Name)
+			if existing == nil && problemId != "89770" && problemId != "61535" {
+				pid, err := strconv.ParseUint(problemId, 10, 64)
+				bug.OnError(err)
+				route.Length = uint(pid)
+
+				InsertProblem(d, route)
+				time.Sleep(100 * time.Millisecond)
+				fmt.Printf("Problem"+database.FORMAT_ROUTE, route.Name, route.Type, route.Grade, route.Stars, route.Length, route.Pitches, "TBD", route.Url, route.Comment)
+			}
+
+			isProblem = false
+			problemId = ""
+
+			route = &database.Route{
+				CragId: Id(d),
+				AreaId: SetId(d),
+				Type:   "moonboard",
+				Stars:  10,
+			}
+		}
+	}
 }

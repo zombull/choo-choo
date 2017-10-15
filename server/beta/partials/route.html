@@ -1,0 +1,45 @@
+<md-content layout-align="center" flex class="md-default-theme" ng-cloak>
+    <div ng-if="route && !error">
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2><div>{{::route.name}}&nbsp;-&nbsp;{{::grade}}</div></h2>
+            <md-divider></md-divider><br>
+
+            <table cellpadding="0" cellspacing="0">
+                <tbody>
+                    <tr><td valign="top">Type</td><td>{{::route.types.join(', ')}}</td></tr>
+                    <tr><td valign="top">Grade</td><td>{{::grade}}</td></tr>
+                    <tr ng-if="::(route.pitches||route.feet)"><td>Length</td><td>{{::route | length}}</td></tr>
+                    <tr><td valign="top">Crag</td><td ng-bind-html="::route.crag | linkify"></td></tr>
+                    <tr><td valign="top">Area</td><td ng-bind-html="::route.area | linkify"></td></tr>
+                    <tr ng-if="::route.links.length">
+                        <td valign="top">Links</td><td><div ng-repeat="link in ::route.links track by link.url" ng-bind-html="::link | linkify:true"></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </md-subheader>
+
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="::area.routes" ng-cloak>
+            <h3>
+                <div ng-if="::!area.problems">{{::area.name}}</div>
+                <div ng-if="::area.problems">{{::area.name}} - Routes</div>
+            </h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.routes track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="::area.problems" ng-cloak>
+            <h3>
+                <div ng-if="::!area.routes">{{::area.name}}</div>
+                <div ng-if="::area.routes">{{::area.name}} - Problems</div>
+            </h3>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="entry in ::area.problems track by entry.url" ng-bind-html="::entry | linkify"></div>
+            </div>
+        </md-subheader>
+    </div>
+    <div class="layout" ng-if="error" ng-include="'partials/error.html'"></div>
+</md-content>
