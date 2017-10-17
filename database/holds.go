@@ -1,5 +1,11 @@
 package database
 
+import (
+	"database/sql"
+
+	"github.com/zombull/choo-choo/bug"
+)
+
 type Holds struct {
 	RouteId int64             `yaml:"-"`
 	Holds   map[string]string `yaml:"holds"`
@@ -93,4 +99,62 @@ func (h *Holds) values() []interface{} {
 		}
 	}
 	return values
+}
+
+func (d *Database) scanHolds(r *sql.Rows) *Holds {
+	defer r.Close()
+
+	for r.Next() {
+		// values := make([]interface{}, len(HoldKeys))
+
+		id := int64(-1)
+		s := make([]string, len(HoldKeys)-1)
+		err := r.Scan(
+			&id,
+			&s[0],
+			&s[1],
+			&s[2],
+			&s[3],
+			&s[4],
+			&s[5],
+			&s[6],
+			&s[7],
+			&s[8],
+			&s[9],
+			&s[10],
+			&s[11],
+			&s[12],
+			&s[13],
+			&s[14],
+			&s[15],
+			&s[16],
+			&s[17],
+			&s[18],
+			&s[19],
+			&s[20],
+			&s[21],
+			&s[22],
+			&s[23],
+		)
+		bug.OnError(err)
+
+		h := &Holds{RouteId: id, Holds: make(map[string]string)}
+		for i, v := range HoldKeys {
+			if i != 0 {
+				if len(s[i-1]) > 0 {
+					h.Holds[v] = s[i-1]
+				}
+			}
+		}
+		return h
+	}
+	return nil
+}
+
+func (d *Database) GetHolds(id int64) *Holds {
+	q := "SELECT * FROM holds WHERE route_id=?"
+	h := d.query(q, []interface{}{id})
+	holds := d.scanHolds(h)
+	bug.On(holds == nil, sql.ErrNoRows.Error())
+	return holds
 }

@@ -1,0 +1,39 @@
+<md-content layout="row" layout-sm="column" layout-align="center" flex class="md-default-theme" ng-cloak>
+    <div flex style="padding-top:20px;">
+        <canvas id="problemCanvas" width="427" height="657"></canvas>
+    </div>
+    <span flex="10" hide-sm></span>
+    <div flex ng-if="problem && !error">
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2><div>{{::problem.n}}&nbsp;-&nbsp;{{::problem.g}}</div></h2>
+            <md-divider></md-divider><br>
+
+            <table cellpadding="0" cellspacing="0">
+                <tbody>
+                    <tr><td valign="top">Setter</td><td ng-bind-html="::setter | linkify"></td></tr>
+                    <tr ng-if="problem.s"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(problem.s) track by $index">&#x2605;</span></td></tr>
+                    <tr ng-if="!problem.s"><td valign="top">Stars</td><td>&#x2620;</td></tr>
+                    <tr ng-if="problem.a"><td valign="top">Ascents</td><td>{{::problem.a}}</td></tr>
+                    <tr ng-if="!problem.a"><td valign="top">Ascents</td><td><span>&#x2620;</span></td></tr>
+                </tbody>
+            </table>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2><div>{{::setter.n}}</div></h2>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="p in ::suggested.setter track by p.u" ng-bind-html="::p | linkify"></div>
+            </div>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2><div>Suggested {{::problem.g}}s</div></h2>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="p in ::suggested.grade track by p.u" ng-bind-html="::p | linkify"></div>
+            </div>
+        </md-subheader>
+    </div>
+    <div class="layout" ng-if="error" ng-include="'partials/error.html'"></div>
+</md-content>

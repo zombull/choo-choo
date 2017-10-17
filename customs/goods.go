@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/zombull/choo-choo/bug"
 	"github.com/zombull/choo-choo/database"
 	"github.com/zombull/choo-choo/moonboard"
-	"github.com/zombull/test/bug"
 )
 
 var ImportTypes = map[string]func(d *database.Database, files []string){

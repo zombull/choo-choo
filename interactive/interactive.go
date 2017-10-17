@@ -16,6 +16,7 @@ import (
 	"github.com/zombull/choo-choo/bug"
 	"github.com/zombull/choo-choo/database"
 	"github.com/zombull/choo-choo/moonboard"
+	"github.com/zombull/choo-choo/server"
 )
 
 type op interface {
@@ -36,7 +37,7 @@ var ops = map[string]op{
 	"stats":  &statsOp{},
 }
 
-func Run(d *database.Database) {
+func Run(d *database.Database, s *server.Server) {
 	m := ops
 	m["import"] = nil
 	m["export"] = nil
@@ -50,7 +51,7 @@ func Run(d *database.Database) {
 		} else if line == "import" {
 			import_(d)
 		} else if line == "export" {
-			export(d)
+			export(d, s)
 		} else if line == "sync" {
 			moonboard.SyncLogbook(d, !getBool("Full Sync"))
 		} else {

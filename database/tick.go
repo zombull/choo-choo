@@ -13,6 +13,8 @@ type Tick struct {
 	AreaId   int64     `yaml:"-"`
 	CragId   int64     `yaml:"-"`
 	Date     time.Time `yaml:"date"`
+	Grade    string    `yaml:"grade"`
+	Stars    uint      `yaml:"stars"`
 	Attempts uint      `yaml:"attempts"`
 	Sessions uint      `yaml:"sessions"`
 	Redpoint bool      `yaml:"redpoint"`
@@ -27,7 +29,9 @@ type Tick struct {
 
 const FORMAT_TICK = `:
     Name:     %s
-    Date:     %s
+	Date:     %s
+	Grade:    %s
+	Stars:    %d
     Redpoint: %t
     Flash:    %t
     Onsight:  %t
@@ -46,6 +50,8 @@ CREATE TABLE IF NOT EXISTS ticks (
 	area_id INTEGER NOT NULL,
 	route_id INTEGER NOT NULL,
 	date DATE NOT NULL,
+	grade TEXT NOT NULL,
+	stars INTEGER NOT NULL,
 	lead BOOLEAN NOT NULL,
 	redpoint BOOLEAN NOT NULL,
 	flash BOOLEAN NOT NULL,
@@ -79,11 +85,11 @@ func (t *Tick) table() string {
 }
 
 func (t *Tick) keys() []string {
-	return []string{"crag_id", "area_id", "route_id", "date", "lead", "redpoint", "flash", "onsight", "falls", "hangs", "attempts", "sessions", "url", "comment"}
+	return []string{"crag_id", "area_id", "route_id", "date", "grade", "stars", "lead", "redpoint", "flash", "onsight", "falls", "hangs", "attempts", "sessions", "url", "comment"}
 }
 
 func (t *Tick) values() []interface{} {
-	return []interface{}{t.CragId, t.AreaId, t.RouteId, t.Date.Unix(), t.Lead, t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Url, t.Comment}
+	return []interface{}{t.CragId, t.AreaId, t.RouteId, t.Date.Unix(), t.Grade, t.Stars, t.Lead, t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Url, t.Comment}
 }
 
 func (d *Database) scanTicks(r *sql.Rows) []*Tick {
@@ -99,6 +105,8 @@ func (d *Database) scanTicks(r *sql.Rows) []*Tick {
 			&t.AreaId,
 			&t.RouteId,
 			&date,
+			&t.Grade,
+			&t.Stars,
 			&t.Lead,
 			&t.Redpoint,
 			&t.Flash,

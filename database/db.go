@@ -74,7 +74,7 @@ type DoubleLP struct {
 
 const SCHEMA string = CRAG_SCHEMA + AREA_SCHEMA + ROUTE_SCHEMA + HOLDS_SCHEMA + TICK_SCHEMA + LIST_SCHEMA + SETTER_SCHEMA
 
-func Init(dir string) (*Database, error) {
+func Init(dir string) *Database {
 	timeout := 5 // TODO - make this command-line configurable?
 
 	// These are used to tune the transaction BEGIN behavior instead of using the
@@ -84,20 +84,16 @@ func Init(dir string) (*Database, error) {
 
 	// Open the database.  Automatically created if it doesn't exist.
 	db, err := sql.Open("sqlite3", path)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %s", err.Error(), path)
-	}
+	bug.On(err != nil, fmt.Sprintf("%v: %s", err, path))
 
-	if _, err = db.Exec(SCHEMA); err != nil {
-		return nil, err
-	}
+	_, err = db.Exec(SCHEMA)
+	bug.OnError(err)
 
 	// Run PRAGMA statements now since they are *per-connection*.
-	if _, err = db.Exec("PRAGMA foreign_keys=ON;"); err != nil {
-		return nil, err
-	}
+	_, err = db.Exec("PRAGMA foreign_keys=ON;")
+	bug.OnError(err)
 
-	return &Database{db}, nil
+	return &Database{db}
 }
 
 func isLockedError(err error) bool {

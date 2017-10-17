@@ -1,85 +1,106 @@
 package server
 
 import (
+	"fmt"
 	"path"
+	"strings"
 
 	"github.com/labstack/echo"
+
+	"github.com/zombull/choo-choo/database"
 )
 
 const domain = "zombull.xyz"
 
-type SubDomain struct {
-	Echo *echo.Echo
+type Server struct {
+	dir   string
+	store *KeyValueStore
 }
 
-func Run(port string) {
-	beta := echo.New()
+func Init(root string) *Server {
+	return &Server{
+		dir:   root,
+		store: newStore(root),
+	}
+}
 
-	beta.Static("/favicon", "common/img/favicon")
-	beta.Static("/static", "beta")
-	beta.Static("/common", "common")
+func (s *Server) commonRoutes(e *echo.Echo, h string) {
+	e.Static("/favicon", path.Join(s.dir, "common/img/favicon"))
+	e.Static("/static", path.Join(s.dir, h))
+	e.Static("/common", path.Join(s.dir, "common"))
 
 	// // Send back the main HTML page when accessing a front facing URL.
-	beta.File("/", "beta/index.html")
-	beta.File("/:crag", "beta/index.html")
-	beta.File("/:crag/a/:area", "beta/index.html")
-	beta.File("/:crag/:route", "beta/index.html")
+	e.File("/", path.Join(s.dir, h, "index.html"))
+	e.GET("/partials/:name", s.partialsRoute(h))
 
-	// beta.GET("/", getIndex)
-	// beta.GET("/:crag", getIndex)
-	// beta.GET("/:crag/a/:area", getIndex)
-	// beta.GET("/:crag/:route", getIndex)
+	e.GET("/data/master", s.store.getMaster(h))
+}
 
-	beta.GET("/partials/:name", getPartials)
+func (s *Server) partialsRoute(h string) func(echo.Context) error {
+	return func(c echo.Context) error {
+		return c.File(path.Join(s.dir, h, "partials", c.Param("name")))
+	}
+}
 
-	db := newData()
+func (s *Server) Run(port string) {
+	beta := echo.New()
+	s.commonRoutes(beta, "beta")
+	beta.File("/:crag", path.Join(s.dir, "beta", "index.html"))
+	beta.File("/:crag/a/:area", path.Join(s.dir, "beta", "index.html"))
+	beta.File("/:crag/:route", path.Join(s.dir, "beta", "index.html"))
 
-	// beta.get('/go', db.go);
-	beta.GET("/data/index", db.getIndex)
-	beta.GET("/data/crag/:crag", db.getCrag)
-	beta.GET("/data/area/:crag/:area", db.getArea)
-	beta.GET("/data/route/:crag/:route", db.getRoute)
+	// beta.GET('/go', s.getGo)
+	beta.GET("/data/crag/:crag", s.store.getCrag)
+	// beta.GET("/data/area/:crag/:area", s.store.getArea)
+	// beta.GET("/data/route/:crag/:route", s.store.getRoute)
 
-	// Setting up beta global  CORS policy
-	// These policy guidelines are overriddable at a per resource level shown below
-	// beta.SetGlobalCors(&vestigo.CorsAccessControl{
-	// 	AllowOrigin:      []string{"*", "test.com"},
-	// 	AllowCredentials: true,
-	// 	ExposeHeaders:    []string{"X-Header", "X-Y-Header"},
-	// 	MaxAge:           24 * 365 * time.Hour,
-	// 	AllowHeaders:     []string{"X-Header", "X-Y-Header"},
-	// })
+	moon := echo.New()
+	s.commonRoutes(moon, "moonboard")
+	moon.File("/:problem", path.Join(s.dir, "moonboard", "index.html"))
 
-	// Catch-All methods to allow easy migration from http.ServeMux
-	// beta.HandleFunc("/general", GeneralHandler)
+	echoes := map[string]*echo.Echo{
+		"beta": beta,
+		"moon": moon,
+	}
 
-	// Below Applies Local CORS capabilities per Resource (both methods covered)
-	// by default this will merge the "GlobalCors" settings with the resource
-	// cors settings.  Without specifying the AllowMethods, the beta will
-	// accept any Request-Methods that have valid handlers associated
-	// beta.SetCors("/welcome", &vestigo.CorsAccessControl{
-	// 	AllowMethods: []string{"GET"},                    // only allow cors for this resource on GET calls
-	// 	AllowHeaders: []string{"X-Header", "X-Z-Header"}, // Allow this one header for this resource
-	// })
+	subs := map[string]string{
+		"northwest": "beta",
+		"southwest": "beta",
+		"southeast": "beta",
+		"norcal":    "beta",
+		"socal":     "beta",
+		"2016abo":   "moon",
+	}
 
 	// Server
 	e := echo.New()
 	e.Any("/*", func(c echo.Context) error {
-		if c.Request().Host == ("beta." + domain + port) {
-			beta.ServeHTTP(c.Response(), c.Request())
-			return nil
+		h := c.Request().Host
+		ss := strings.SplitN(h, ".", 2)
+		if len(ss) != 2 || ss[1] != domain+port {
+			fmt.Printf("%v\n", ss)
+			return echo.ErrNotFound
 		}
+		h = ss[0]
 
-		return c.File("beta/substorage.html")
+		if ee, ok := echoes[h]; ok {
+			ee.ServeHTTP(c.Response(), c.Request())
+			return nil
+		} else if hh, ok := subs[h]; ok {
+			return c.File(path.Join(s.dir, hh, "substorage.html"))
+		}
+		fmt.Printf("host = %s", h)
+		return echo.ErrNotFound
 	})
 	e.Logger.Fatal(e.Start(port))
+}
+
+func (s *Server) Update(d *database.Database) {
+	// s.client.Nuke()
+	s.store.update(d)
 }
 
 // func getIndex(c echo.Context) error {
 // 	// fmt.Printf("INDEX: %s", c.Request().URL.Path)
 // 	// return c.File("public/index.html")
 // }
-
-func getPartials(c echo.Context) error {
-	return c.File(path.Join("beta/partials/", c.Param("name")))
-}

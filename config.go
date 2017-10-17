@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/zombull/choo-choo/bug"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -18,8 +20,13 @@ type Config struct {
 	// Database is the path to the directory where the SQLite database
 	// exists (or is created).
 	// Env Var: CHOO_CHOO_DATABASE
-	// Default: $HOME/.db/choo-choo
+	// Default: $HOME/.db
 	Database string `yaml:"database"`
+
+	// Server is the path to the root directory of the web server.
+	// Env Var: CHOO_CHOO_DATABASE
+	// Default: $HOME/Development/go/src/github.com/zombull/choo-choo/server
+	Server string `yaml:"server"`
 
 	// Specify the Moonboard set, i.e. year and holds combination.
 	// Env Var: CHOO_CHOO_MOONBOARD_SET
@@ -28,7 +35,7 @@ type Config struct {
 
 	// Specify the Moonboard user (display name), e.g. Sean Christopherson
 	// Env Var: CHOO_CHOO_MOONBOARD_USER
-	// Default: "2016 A+B+O"
+	// Default: "Sean Christopherson"
 	MoonboardUser string `yaml:"moonboard_user"`
 
 	// Github is the URL of the Github repository for the database.  This
@@ -48,7 +55,7 @@ func loadEnvVar(name, def string) string {
 
 // LoadConfig reads the configuration from the config path; if the path does
 // not exist, it returns a default configuration.
-func loadConfig() (*Config, error) {
+func loadConfig() *Config {
 	// Use a default config if a user-defined file does not exist.
 	// Basic Windows (not MinGW or MSysGit) may not have $HOME set,
 	// look for HOMEDRIVE and HOMEPATH.
@@ -59,6 +66,7 @@ func loadConfig() (*Config, error) {
 	c := Config{
 		Config:        path.Join(dir, ".config", "choo-choo", "config.yml"),
 		Database:      path.Join(dir, ".db"),
+		Server:        path.Join(dir, "Development", "go", "src", "github.com", "zombull", "choo-choo", "server"),
 		MoonboardSet:  "2016 A+B+O",
 		MoonboardUser: "Sean Christopherson",
 		Github:        "",
@@ -68,24 +76,22 @@ func loadConfig() (*Config, error) {
 	data, err := ioutil.ReadFile(path)
 	if err == nil {
 		err = yaml.Unmarshal(data, &c)
-		if err != nil {
-			return nil, fmt.Errorf("cannot parse config file: %v", err)
-		}
-	} else if !os.IsNotExist(err) {
-		return nil, fmt.Errorf("cannot read config file: %v", err)
+		bug.OnError(err)
+	} else {
+		bug.On(!os.IsNotExist(err), fmt.Sprintf("cannot read config file: %v", err))
 	}
 
 	c.Database = loadEnvVar("DATABASE", c.Database)
+	c.Server = loadEnvVar("SERVER", c.Server)
 	c.MoonboardSet = loadEnvVar("MOONBOARD_SET", c.MoonboardSet)
 	c.MoonboardUser = loadEnvVar("MOONBOARD_USER", c.MoonboardUser)
 	c.Github = loadEnvVar("GITHUB", c.Github)
 
-	if c.Database == "" {
-		return nil, fmt.Errorf("database must be a non-empty string")
-	}
-	if err = os.MkdirAll(c.Database, 0770); err != nil {
-		return nil, err
-	}
+	bug.On(len(c.Database) == 0, "database must be a non-empty string")
+	bug.On(len(c.Server) == 0, "database must be a non-empty string")
 
-	return &c, nil
+	err = os.MkdirAll(c.Database, 0770)
+	bug.OnError(err)
+
+	return &c
 }

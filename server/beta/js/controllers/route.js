@@ -9,7 +9,8 @@ beta.controller('RouteController', function RouteController($scope, $routeParams
         $scope.error = $scope.error || error;
 
         if (!error) {
-            $scope.grade = (route.grade.yds ? route.grade.yds : route.grade.hueco) + (route.mod ? ' ' + route.mod : ''); // + ' / ' + route.grade.font;
+            // $scope.grade = (route.grade.yds ? route.grade.yds : route.grade.hueco) + (route.mod ? ' ' + route.mod : ''); // + ' / ' + route.grade.font;
+            scope.grade = route.g
 
             database.area($routeParams.crag, route.area.url.split("/").pop(), function(area, error) {
                 $scope.area = area;
