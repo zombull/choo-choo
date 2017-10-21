@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/chzyer/readline"
-	"github.com/zombull/choo-choo/bug"
-	"github.com/zombull/choo-choo/database"
+	"github.com/zombull/floating-castle/bug"
+	"github.com/zombull/floating-castle/database"
 )
 
 func newSetAutocompleter(s database.Set) readline.AutoCompleter {

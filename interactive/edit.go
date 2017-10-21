@@ -1,7 +1,7 @@
 package interactive
 
 import (
-	"github.com/zombull/choo-choo/database"
+	"github.com/zombull/floating-castle/database"
 )
 
 type editOp struct {

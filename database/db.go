@@ -8,7 +8,7 @@ import (
 	"time"
 
 	sqlite3 "github.com/mattn/go-sqlite3"
-	"github.com/zombull/choo-choo/bug"
+	"github.com/zombull/floating-castle/bug"
 )
 
 var TableTypes = Set{
@@ -79,7 +79,7 @@ func Init(dir string) *Database {
 
 	// These are used to tune the transaction BEGIN behavior instead of using the
 	// similar "locking_mode" pragma (locking for the whole database connection).
-	path := path.Join(dir, "choo-choo.db")
+	path := path.Join(dir, "floating-castle.db")
 	path = fmt.Sprintf("%s?_busy_timeout=%d&_txlock=exclusive", path, timeout*1000)
 
 	// Open the database.  Automatically created if it doesn't exist.

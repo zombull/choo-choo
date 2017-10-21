@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/zombull/choo-choo/bug"
-	"github.com/zombull/choo-choo/database"
+	"github.com/zombull/floating-castle/bug"
+	"github.com/zombull/floating-castle/database"
 	"gopkg.in/yaml.v2"
 )
 

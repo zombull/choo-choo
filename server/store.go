@@ -16,9 +16,9 @@ import (
 
 	"github.com/labstack/echo"
 
-	"github.com/zombull/choo-choo/bug"
-	"github.com/zombull/choo-choo/database"
-	"github.com/zombull/choo-choo/moonboard"
+	"github.com/zombull/floating-castle/bug"
+	"github.com/zombull/floating-castle/database"
+	"github.com/zombull/floating-castle/moonboard"
 )
 
 type KeyValueStore struct {

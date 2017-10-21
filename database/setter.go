@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/zombull/choo-choo/bug"
+	"github.com/zombull/floating-castle/bug"
 )
 
 type Setter struct {

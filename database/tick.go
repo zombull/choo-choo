@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/zombull/choo-choo/bug"
+	"github.com/zombull/floating-castle/bug"
 )
 
 type Tick struct {

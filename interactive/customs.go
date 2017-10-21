@@ -1,10 +1,10 @@
 package interactive
 
 import (
-	"github.com/zombull/choo-choo/bug"
-	"github.com/zombull/choo-choo/customs"
-	"github.com/zombull/choo-choo/database"
-	"github.com/zombull/choo-choo/server"
+	"github.com/zombull/floating-castle/bug"
+	"github.com/zombull/floating-castle/customs"
+	"github.com/zombull/floating-castle/database"
+	"github.com/zombull/floating-castle/server"
 )
 
 func import_(d *database.Database) {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/zombull/choo-choo/database"
-	"github.com/zombull/choo-choo/moonboard"
+	"github.com/zombull/floating-castle/database"
+	"github.com/zombull/floating-castle/moonboard"
 )
 
 type addOp struct {

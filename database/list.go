@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/zombull/choo-choo/bug"
+	"github.com/zombull/floating-castle/bug"
 )
 
 type List struct {
