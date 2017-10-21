@@ -116,74 +116,8 @@ func (s *KeyValueStore) getProblem(c echo.Context) error {
 	return s.get(c, "problem:"+set+":"+problem, fmt.Sprintf("The problem '%s' was not found in Moonboard set %s.", problem, set))
 }
 
-// func (s *KeyValueStore) processKeys(req, res, err, keys) {
-// 	if (err) {
-// 		return res.status(500).send(internalServerError);
-// 	}
-// 	if (keys && keys.length) {
-// 		return client.get(keys[0], function(err, data) {
-// 			if (err) {
-// 				return res.status(500).send(internalServerError);
-// 			}
-// 			var entry = JSON.parse(data);
-// 			if (!entry || !entry.url) {
-// 				return res.status(500).send(internalServerError);
-// 			}
-// 			if (req.query.mp && entry.links) {
-// 				var mpLinks = entry.links.filter(function(link) { return link.name === "Mountain Project"; });
-// 				if (mpLinks.length) {
-// 					return res.redirect(mpLinks[0].url);
-// 				}
-// 			}
-// 			return res.redirect(entry.url);
-// 		});
-// 	}
-// 	return "continue";
-// };
-
-// func (s *KeyValueStore) getGo(c echo.Context) {
-// 	if (!req.query.q) {
-// 		return files.error400(req, res);
-// 	}
-// 	req.query.q = req.query.q.replace(/\s*/g, "");
-
-// 	client.keys("crag:*" + req.query.q + "*", function (err, keys) {
-// 		if (processKeys(req, res, err, keys) === "continue") {
-
-// 			client.keys("area:*" + req.query.q + "*", function (err, keys) {
-// 				if (processKeys(req, res, err, keys) === "continue") {
-
-// 					client.keys("route:*" + req.query.q + "*", function (err, keys) {
-// 						if (processKeys(req, res, err, keys) === "continue") {
-// 							return files.error404(req, res);
-// 						}
-// 					});
-// 				}
-// 			});
-// 		}
-// 	});
-// };
-
-// var skips = map [string][]string{
-//     "joshuatree-5.9-trad.json": {
-//         "Bonny's Boo-Boo",
-//         "Date Rape",
-//         "Flakey Friends",
-//         "Mystic Knights of the Sea",
-// 	},
-// }
-
-// var _ = require('lodash'),
-//     fs = require('fs'),
-//     path = require('path'),
-//     crypto = require('crypto'),
-//     grades = require('../mp/grades'),
-//     skips = require('./skips'),
-//     duplicates = require('./duplicates');
-
 func checksum(b []byte) []byte {
 	return []byte(fmt.Sprintf("%x", md5.Sum(b)))
-	// return crypto.createHash('md5').update(JSON.stringify(item)).digest('hex');
 }
 
 func sanitize(s string) string {
@@ -390,6 +324,71 @@ type betaEntry struct {
 	Types         string `json:"t,omitempty"` // bstar = Boulder+Sport+Trade+Aid+topRope
 	Difficulty    uint   `json:"d,omitempty"`
 }
+
+// func (s *KeyValueStore) processKeys(req, res, err, keys) {
+// 	if (err) {
+// 		return res.status(500).send(internalServerError);
+// 	}
+// 	if (keys && keys.length) {
+// 		return client.get(keys[0], function(err, data) {
+// 			if (err) {
+// 				return res.status(500).send(internalServerError);
+// 			}
+// 			var entry = JSON.parse(data);
+// 			if (!entry || !entry.url) {
+// 				return res.status(500).send(internalServerError);
+// 			}
+// 			if (req.query.mp && entry.links) {
+// 				var mpLinks = entry.links.filter(function(link) { return link.name === "Mountain Project"; });
+// 				if (mpLinks.length) {
+// 					return res.redirect(mpLinks[0].url);
+// 				}
+// 			}
+// 			return res.redirect(entry.url);
+// 		});
+// 	}
+// 	return "continue";
+// };
+
+// func (s *KeyValueStore) getGo(c echo.Context) {
+// 	if (!req.query.q) {
+// 		return files.error400(req, res);
+// 	}
+// 	req.query.q = req.query.q.replace(/\s*/g, "");
+
+// 	client.keys("crag:*" + req.query.q + "*", function (err, keys) {
+// 		if (processKeys(req, res, err, keys) === "continue") {
+
+// 			client.keys("area:*" + req.query.q + "*", function (err, keys) {
+// 				if (processKeys(req, res, err, keys) === "continue") {
+
+// 					client.keys("route:*" + req.query.q + "*", function (err, keys) {
+// 						if (processKeys(req, res, err, keys) === "continue") {
+// 							return files.error404(req, res);
+// 						}
+// 					});
+// 				}
+// 			});
+// 		}
+// 	});
+// };
+
+// var skips = map [string][]string{
+//     "joshuatree-5.9-trad.json": {
+//         "Bonny's Boo-Boo",
+//         "Date Rape",
+//         "Flakey Friends",
+//         "Mystic Knights of the Sea",
+// 	},
+// }
+
+// var _ = require('lodash'),
+//     fs = require('fs'),
+//     path = require('path'),
+//     crypto = require('crypto'),
+//     grades = require('../mp/grades'),
+//     skips = require('./skips'),
+//     duplicates = require('./duplicates');
 
 // func (s *KeyValueStore) func(cragUrl, areaName string, a *area, isBoulder bool)
 //     if (isBoulder) {
