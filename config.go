@@ -59,7 +59,7 @@ func loadConfig() *Config {
 	}
 	c := Config{
 		Config:        path.Join(dir, ".config", "floating-castle", "config.yml"),
-		Database:      path.Join(dir, ".db"),
+		Database:      path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "database", "sqlite3"),
 		Server:        path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "server"),
 		MoonboardSet:  "2016 A+B+O",
 		MoonboardUser: "Sean Christopherson",
