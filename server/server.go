@@ -33,13 +33,24 @@ func (s *Server) commonRoutes(e *echo.Echo, h string) {
 	e.File("/", path.Join(s.dir, h, "index.html"))
 	e.GET("/partials/:name", s.partialsRoute(h))
 
-	e.GET("/data/master", s.store.getMaster(h))
+	e.GET("/data/master", s.store.getInternal(h))
+	e.GET("/data/ticks", s.store.getTicks(h))
 }
 
 func (s *Server) partialsRoute(h string) func(echo.Context) error {
 	return func(c echo.Context) error {
 		return c.File(path.Join(s.dir, h, "partials", c.Param("name")))
 	}
+}
+
+func (s *Server) Log(port string) {
+	// Server
+	e := echo.New()
+	e.Any("/*", func(c echo.Context) error {
+		fmt.Printf("%s: %s%s\n", c.Request().Method, c.Request().Host, c.Request().URL.Path)
+		return echo.ErrNotFound
+	})
+	e.Logger.Fatal(e.StartTLS(port, path.Join(s.dir, "cert.pem"), path.Join(s.dir, "key.pem")))
 }
 
 func (s *Server) Run(port string) {

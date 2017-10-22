@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/zombull/floating-castle/bug"
 	"github.com/zombull/floating-castle/database"
-	"github.com/zombull/floating-castle/moonboard"
 )
 
 type addOp struct {
@@ -52,16 +52,12 @@ func (a *addOp) route(d *database.Database) {
 }
 
 func (a *addOp) newRoute(d *database.Database, crag *database.Crag) *database.Route {
-	var r *database.Route
-	if crag != nil && crag.Name == moonboard.Name {
-		r = a.newMoonbooardProblem(d)
-	} else {
-		r = &database.Route{
-			Name: getString("Route Name", false),
-			Type: getType(d),
-		}
+	r := &database.Route{
+		Name: getString("Route Name", false),
+		Type: getType(d),
 	}
-	if r.Type == "boulder" || r.Type == "moonboard" {
+	bug.On(r.Type == "moonboard", "Moonboard problems can't be added interactively")
+	if r.Type == "boulder" {
 		r.Grade = getVGrade()
 	} else {
 		r.Grade = getYdsGrade()
@@ -88,32 +84,9 @@ func (a *addOp) newRoute(d *database.Database, crag *database.Crag) *database.Ro
 	}
 	r.Comment = getComment()
 
-	if r.Type == "moonboard" {
-		moonboard.InsertProblem(d, r)
-	} else {
-		d.Insert(r)
-	}
+	d.Insert(r)
 	fmt.Printf("Added Route"+database.FORMAT_ROUTE, r.Name, r.Type, r.Grade, r.Stars, r.Length, r.Pitches, setter, r.Url, r.Comment)
 	return r
-}
-
-func (a *addOp) newMoonbooardProblem(d *database.Database) *database.Route {
-	crag := d.GetCrag(moonboard.Id(d))
-	area := getArea(d, crag)
-retry:
-	name, url := queryMoonboardName()
-	r := d.FindRoute(area.Id, name)
-	if r != nil {
-		fmt.Printf("Moonboard problem '%s' already exists in the database", name)
-		goto retry
-	}
-	return &database.Route{
-		Name:   name,
-		Type:   "moonboard",
-		Url:    url,
-		CragId: crag.Id,
-		AreaId: area.Id,
-	}
 }
 
 func (a *addOp) tick(d *database.Database) {
@@ -155,35 +128,9 @@ func (a *addOp) tick(d *database.Database) {
 	t.Comment = getComment()
 	d.Insert(&t)
 
-	fmt.Printf("Added Tick"+database.FORMAT_TICK, r.Name, t.Date.Format("January 02, 2006"), t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Url, t.Comment)
+	fmt.Printf("Added Tick"+database.FORMAT_TICK, r.Name, t.Date.Format("January 02, 2006"), t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Comment)
 }
 
 func (a *addOp) list(d *database.Database) {
 
-}
-
-func queryMoonboardName() (string, string) {
-	for {
-		s := getString("Moonboard Query", false)
-		m := moonboard.QueryProblems(s)
-		if len(m) == 0 {
-			fmt.Printf("Did not find any Moonboard problems matching '%s'\n", s)
-			continue
-		}
-
-		ac := newMapAutocompleter(m)
-		l := newReader("Select Problem: ", ac)
-		url := ""
-		name := doReadline(l, true, func(line string) string {
-			if v, ok := m[line]; ok {
-				url = v
-				return line
-			}
-			fmt.Println("Select a problem or hit Ctrl+C to cancel")
-			return ""
-		})
-		if name != "" {
-			return name, url
-		}
-	}
 }

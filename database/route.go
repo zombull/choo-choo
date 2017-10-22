@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/zombull/floating-castle/bug"
 )
@@ -22,30 +23,34 @@ var Stars = map[string]int{
 }
 
 type Route struct {
-	Id       int64  `yaml:"-"`
-	CragId   int64  `yaml:"-"`
-	AreaId   int64  `yaml:"-"`
-	SetterId int64  `yaml:"-"`
-	Name     string `yaml:"name"`
-	Type     string `yaml:"type"`
-	Grade    string `yaml:"grade"`
-	Stars    uint   `yaml:"stars"`
-	Length   uint   `yaml:"length"`
-	Pitches  uint   `yaml:"pitches"`
-	Url      string `yaml:"url"`
-	Comment  string `yaml:"comment"`
+	Id        int64     `yaml:"-"`
+	CragId    int64     `yaml:"-"`
+	AreaId    int64     `yaml:"-"`
+	SetterId  int64     `yaml:"-"`
+	Name      string    `yaml:"name"`
+	Type      string    `yaml:"type"`
+	Date      time.Time `yaml:"date"`
+	Grade     string    `yaml:"grade"`
+	Stars     uint      `yaml:"stars"`
+	Length    uint      `yaml:"length"`  // doubles as Moonboard ID
+	Pitches   uint      `yaml:"pitches"` // doubles as Moonboard ascents/repeats
+	Benchmark bool      `yaml:"benchmark"`
+	Url       string    `yaml:"url"`
+	Comment   string    `yaml:"comment"`
 }
 
 const FORMAT_ROUTE = `:
-    Name:     %s
-    Type:     %s
-    Grade:    %s
-    Stars:    %d
-    Length:   %d
-    Pitches:  %d
-    Setter:   %s
-    Url:      %s
-    Comment:  %s
+    Name:       %s
+    Type:       %s
+    Date:       %s
+	Grade:      %s
+	Benchmark:  %t
+    Stars:      %d
+    Length:     %d
+    Pitches:    %d
+    Setter:     %s
+    Url:        %s
+    Comment:    %s
 `
 
 const ROUTE_SCHEMA string = `
@@ -56,10 +61,12 @@ CREATE TABLE IF NOT EXISTS routes (
 	setter_id INTEGER NOT NULL,
 	name TEXT NOT NULL,
 	type TEXT NOT NULL,
+	date DATE NOT NULL,
 	grade TEXT NOT NULL,
 	stars INTEGER NOT NULL,
 	length INTEGER NOT NULL,
 	pitches INTEGER NOT NULL,
+	benchmark BOOLEAN,
 	url TEXT,
 	comment TEXT,
 	FOREIGN KEY (crag_id) REFERENCES crags (id),
@@ -82,11 +89,11 @@ func (r *Route) table() string {
 }
 
 func (r *Route) keys() []string {
-	return []string{"crag_id", " area_id", " setter_id", " name", " type", " grade", " stars", " length", " pitches", " url", " comment"}
+	return []string{"crag_id", "area_id", "setter_id", "name", "type", "date", "grade", "stars", "length", "pitches", "benchmark", "url", "comment"}
 }
 
 func (r *Route) values() []interface{} {
-	return []interface{}{r.CragId, r.AreaId, r.SetterId, r.Name, r.Type, r.Grade, r.Stars, r.Length, r.Pitches, r.Url, r.Comment}
+	return []interface{}{r.CragId, r.AreaId, r.SetterId, r.Name, r.Type, r.Date.Unix(), r.Grade, r.Stars, r.Length, r.Pitches, r.Benchmark, r.Url, r.Comment}
 }
 
 func (d *Database) scanRoutes(r *sql.Rows) []*Route {
@@ -102,10 +109,12 @@ func (d *Database) scanRoutes(r *sql.Rows) []*Route {
 			&route.SetterId,
 			&route.Name,
 			&route.Type,
+			&route.Date,
 			&route.Grade,
 			&route.Stars,
 			&route.Length,
 			&route.Pitches,
+			&route.Benchmark,
 			&route.Url,
 			&route.Comment,
 		)

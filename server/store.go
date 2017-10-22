@@ -87,9 +87,15 @@ func (s *KeyValueStore) get(c echo.Context, key, notFound string) error {
 	// return c.JSONBlob(http.StatusOK, []byte(val))
 }
 
-func (s *KeyValueStore) getMaster(key string) func(c echo.Context) error {
+func (s *KeyValueStore) getInternal(key string) func(c echo.Context) error {
 	return func(c echo.Context) error {
 		return s.get(c, key, "")
+	}
+}
+
+func (s *KeyValueStore) getTicks(host string) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		return s.get(c, "ticks:"+host, fmt.Sprintf("Did not find any ticks for '%s'", host))
 	}
 }
 
@@ -139,6 +145,8 @@ type moonEntry struct {
 	Url           string `json:"u"`
 	Name          string `json:"n"`
 	LowerCaseName string `json:"l"`
+	Date          string `json:"t,omitempty"`
+	Nickname      string `json:"k,omitempty"`
 	Holds         holds  `json:"h,omitempty"`
 	Problems      []int  `json:"p,omitempty"`
 	Setter        int    `json:"e,omitempty"`
@@ -147,6 +155,7 @@ type moonEntry struct {
 	Stars         uint   `json:"s,omitempty"`
 	Id            uint   `json:"i,omitempty"` // Moonboard ID
 	Ascents       uint   `json:"a,omitempty"`
+	Benchmark     bool   `json:"b,omitempty"`
 	Comment       string `json:"c,omitempty"`
 }
 
@@ -156,6 +165,15 @@ type moonData struct {
 	Setters  map[string]int `json:"s"`
 	Grades   [17][]int      `json:"g"`
 	Images   []string       `json:"img"`
+}
+
+type moonTick struct {
+	Problem  int    `json:"p"`
+	Date     string `json:"d"`
+	Grade    string `json:"g"`
+	Stars    uint   `json:"s"`
+	Attempts uint   `json:"a"`
+	Sessions uint   `json:"e"`
 }
 
 func getProblemUrl(s string) string {
@@ -215,6 +233,7 @@ func (s *KeyValueStore) update(d *database.Database) {
 		e := moonEntry{
 			Url:           getSetterUrl(r.Name),
 			Name:          r.Name,
+			Nickname:      r.Nickname,
 			LowerCaseName: strings.ToLower(r.Name),
 			Problems:      make([]int, 0),
 		}
@@ -237,12 +256,14 @@ func (s *KeyValueStore) update(d *database.Database) {
 			Url:           getProblemUrl(r.Url),
 			Name:          r.Name,
 			LowerCaseName: strings.ToLower(r.Name),
+			Date:          r.Date.Format("January 02, 2006"),
 			Setter:        setter,
 			Grade:         r.Grade,
 			Difficulty:    conversions[r.Grade],
 			Stars:         r.Stars,
 			Id:            r.Length,
 			Ascents:       r.Pitches,
+			Benchmark:     r.Benchmark,
 			Comment:       r.Comment,
 		}
 
@@ -253,21 +274,29 @@ func (s *KeyValueStore) update(d *database.Database) {
 		}
 
 		h2 := d.GetHolds(r.Id)
-		for k, v := range h2.Holds {
-			if string(k[0]) == "s" {
-				e.Holds.Start = append(e.Holds.Start, v)
-			} else if string(k[0]) == "f" {
-				e.Holds.Finish = append(e.Holds.Finish, v)
+		for _, v := range h2.Holds {
+			h := string(v[1:])
+			if string(v[0]) == "s" {
+				e.Holds.Start = append(e.Holds.Start, h)
+			} else if string(v[0]) == "f" {
+				e.Holds.Finish = append(e.Holds.Finish, h)
 			} else {
-				e.Holds.Intermediate = append(e.Holds.Intermediate, v)
+				e.Holds.Intermediate = append(e.Holds.Intermediate, h)
 			}
 		}
+		bug.On(len(e.Holds.Start) == 0, "No start hold found")
+		bug.On(len(e.Holds.Finish) == 0, "No finish hold found")
+
 		// Sort the holds so that the checksum is stable.
 		sort.Strings(e.Holds.Start)
 		sort.Strings(e.Holds.Intermediate)
 		sort.Strings(e.Holds.Finish)
 
-		_, ok = md.Problems[e.Url]
+		if _, ok = md.Problems[e.Url]; ok {
+			e.Url = fmt.Sprintf("%d-%s", e.Id, e.Url)
+			fmt.Printf("Duplicate Moonboard problem, new URL: %s\n", e.Url)
+			_, ok = md.Problems[e.Url]
+		}
 		bug.On(ok, fmt.Sprintf("Duplicate Moonboard problem URL: %s", e.Url))
 		md.Problems[e.Url] = i
 

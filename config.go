@@ -17,10 +17,16 @@ type Config struct {
 	// to avoid a Catch-22.
 	Config string `yaml:"-"`
 
+	// Cache is the path to the Moonboard directory where files pulled from
+	// moonboard.com will be stored.
+	// Env Var: FC_CACHE
+	// Default: $HOME/Development/go/src/github.com/zombull/floating-castle/moonboard/cache
+	Cache string `yaml:"cache"`
+
 	// Database is the path to the directory where the SQLite database
 	// exists (or is created).
 	// Env Var: FC_DATABASE
-	// Default: $HOME/.db
+	// Default: $HOME/Development/go/src/github.com/zombull/floating-castle/database/sqlite3
 	Database string `yaml:"database"`
 
 	// Server is the path to the root directory of the web server.
@@ -30,13 +36,8 @@ type Config struct {
 
 	// Specify the Moonboard set, i.e. year and holds combination.
 	// Env Var: FC_MOONBOARD_SET
-	// Default: "2016 A+B+O"
+	// Default: "MoonBoard 2016"
 	MoonboardSet string `yaml:"moonboard_set"`
-
-	// Specify the Moonboard user (display name), e.g. Sean Christopherson
-	// Env Var: FC_MOONBOARD_USER
-	// Default: "Sean Christopherson"
-	MoonboardUser string `yaml:"moonboard_user"`
 }
 
 func loadEnvVar(name, def string) string {
@@ -58,11 +59,11 @@ func loadConfig() *Config {
 		dir = path.Join(os.Getenv("HOMEDRIVE"), os.Getenv("HOMEPATH"))
 	}
 	c := Config{
-		Config:        path.Join(dir, ".config", "floating-castle", "config.yml"),
-		Database:      path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "database", "sqlite3"),
-		Server:        path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "server"),
-		MoonboardSet:  "2016 A+B+O",
-		MoonboardUser: "Sean Christopherson",
+		Config:       path.Join(dir, ".config", "floating-castle", "config.yml"),
+		Cache:        path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "moonboard", "cache"),
+		Database:     path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "database", "sqlite3"),
+		Server:       path.Join(dir, "Development", "go", "src", "github.com", "zombull", "floating-castle", "server"),
+		MoonboardSet: "MoonBoard 2016",
 	}
 
 	path := loadEnvVar("CONFIG", c.Config)
@@ -74,13 +75,14 @@ func loadConfig() *Config {
 		bug.On(!os.IsNotExist(err), fmt.Sprintf("cannot read config file: %v", err))
 	}
 
+	c.Cache = loadEnvVar("CACHE", c.Cache)
 	c.Database = loadEnvVar("DATABASE", c.Database)
 	c.Server = loadEnvVar("SERVER", c.Server)
 	c.MoonboardSet = loadEnvVar("MOONBOARD_SET", c.MoonboardSet)
-	c.MoonboardUser = loadEnvVar("MOONBOARD_USER", c.MoonboardUser)
 
-	bug.On(len(c.Database) == 0, "database must be a non-empty string")
-	bug.On(len(c.Server) == 0, "database must be a non-empty string")
+	bug.On(len(c.Cache) == 0, "CACHE must be a non-empty string")
+	bug.On(len(c.Database) == 0, "DATABASE must be a non-empty string")
+	bug.On(len(c.Server) == 0, "SERVER must be a non-empty string")
 
 	err = os.MkdirAll(c.Database, 0770)
 	bug.OnError(err)

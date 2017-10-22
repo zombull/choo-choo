@@ -7,65 +7,65 @@ import (
 )
 
 type Holds struct {
-	RouteId int64             `yaml:"-"`
-	Holds   map[string]string `yaml:"holds"`
+	RouteId int64    `yaml:"-"`
+	Holds   []string `yaml:"holds"`
 }
 
 var HoldKeys = []string{
 	"route_id",
-	"start_1",
-	"start_2",
-	"intermediate_1",
-	"intermediate_2",
-	"intermediate_3",
-	"intermediate_4",
-	"intermediate_5",
-	"intermediate_6",
-	"intermediate_7",
-	"intermediate_8",
-	"intermediate_9",
-	"intermediate_10",
-	"intermediate_11",
-	"intermediate_12",
-	"intermediate_13",
-	"intermediate_14",
-	"intermediate_15",
-	"intermediate_16",
-	"intermediate_17",
-	"intermediate_18",
-	"intermediate_19",
-	"intermediate_20",
-	"finish_one",
-	"finish_two",
+	"h1",
+	"h2",
+	"h3",
+	"h4",
+	"h5",
+	"h6",
+	"h7",
+	"h8",
+	"h9",
+	"h10",
+	"h11",
+	"h12",
+	"h13",
+	"h14",
+	"h15",
+	"h16",
+	"h17",
+	"h18",
+	"h19",
+	"h20",
+	"h21",
+	"h22",
+	"h23",
+	"h24",
 }
 
 const HOLDS_SCHEMA = `
 CREATE TABLE IF NOT EXISTS holds (
 	route_id INTEGER PRIMARY KEY,
-	start_1 TEXT NOT NULL,
-	start_2 TEXT,
-	intermediate_1 TEXT,
-	intermediate_2 TEXT,
-	intermediate_3 TEXT,
-	intermediate_4 TEXT,
-	intermediate_5 TEXT,
-	intermediate_6 TEXT,
-	intermediate_7 TEXT,
-	intermediate_8 TEXT,
-	intermediate_9 TEXT,
-	intermediate_10 TEXT,
-	intermediate_11 TEXT,
-	intermediate_12 TEXT,
-	intermediate_13 TEXT,
-	intermediate_14 TEXT,
-	intermediate_15 TEXT,
-	intermediate_16 TEXT,
-	intermediate_17 TEXT,
-	intermediate_18 TEXT,
-	intermediate_19 TEXT,
-	intermediate_20 TEXT,
-	finish_one TEXT NOT NULL,
-	finish_two TEXT,
+	h1 TEXT NOT NULL,
+	h2 TEXT NOT NULL,
+	h3 TEXT,
+	h4 TEXT,
+	h5 TEXT,
+	h6 TEXT,
+	h7 TEXT,
+	h8 TEXT,
+	h9 TEXT,
+	h10 TEXT,
+	h11 TEXT,
+	h12 TEXT,
+	h13 TEXT,
+	h14 TEXT,
+	h15 TEXT,
+	h16 TEXT,
+	h17 TEXT,
+	h18 TEXT,
+	h19 TEXT,
+	h20 TEXT,
+	h21 TEXT,
+	h22 TEXT,
+	h23 TEXT,
+	h24 TEXT,
 	FOREIGN KEY (route_id) REFERENCES routes (id)
 );`
 
@@ -91,11 +91,11 @@ func (h *Holds) keys() []string {
 
 func (h *Holds) values() []interface{} {
 	values := make([]interface{}, len(HoldKeys))
-	for i, k := range HoldKeys {
+	for i := range HoldKeys {
 		if i == 0 {
 			values[i] = h.RouteId
-		} else {
-			values[i] = h.Holds[k]
+		} else if i-1 < len(h.Holds) {
+			values[i] = h.Holds[i-1]
 		}
 	}
 	return values
@@ -108,7 +108,7 @@ func (d *Database) scanHolds(r *sql.Rows) *Holds {
 		// values := make([]interface{}, len(HoldKeys))
 
 		id := int64(-1)
-		s := make([]string, len(HoldKeys)-1)
+		s := make([]sql.NullString, len(HoldKeys)-1)
 		err := r.Scan(
 			&id,
 			&s[0],
@@ -138,12 +138,10 @@ func (d *Database) scanHolds(r *sql.Rows) *Holds {
 		)
 		bug.OnError(err)
 
-		h := &Holds{RouteId: id, Holds: make(map[string]string)}
-		for i, v := range HoldKeys {
-			if i != 0 {
-				if len(s[i-1]) > 0 {
-					h.Holds[v] = s[i-1]
-				}
+		h := &Holds{RouteId: id, Holds: make([]string, 0, 2)}
+		for i := range HoldKeys {
+			if i != 0 && s[i-1].Valid {
+				h.Holds = append(h.Holds, s[i-1].String)
 			}
 		}
 		return h

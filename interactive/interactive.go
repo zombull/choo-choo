@@ -41,7 +41,6 @@ func Run(d *database.Database, s *server.Server) {
 	m := ops
 	m["import"] = nil
 	m["export"] = nil
-	m["sync"] = nil
 	ac := newMapAutocompleter(m)
 	l := newReader("Select Action: ", ac)
 	doReadline(l, true, func(line string) string {
@@ -51,9 +50,7 @@ func Run(d *database.Database, s *server.Server) {
 		} else if line == "import" {
 			import_(d)
 		} else if line == "export" {
-			export(d, s)
-		} else if line == "sync" {
-			moonboard.SyncLogbook(d, !getBool("Full Sync"))
+			export(d)
 		} else {
 			fmt.Println("Invalid Action: " + line)
 		}

@@ -11,6 +11,9 @@ type Setter struct {
 	Id       int64  `yaml:"-"`
 	CragId   int64  `yaml:"-"`
 	Name     string `yaml:"name"`
+	Nickname string `yaml:"nickname"`
+	Country  string `json:"country"`
+	City     string `json:"city"`
 	Inactive bool   `yaml:"inactive"`
 	Comment  string `yaml:"name"`
 }
@@ -20,6 +23,9 @@ CREATE TABLE IF NOT EXISTS setters (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	crag_id INTEGER NOT NULL,
 	name TEXT NOT NULL,
+	nickname TEXT,
+	country TEXT NOT NULL,
+	city TEXT NOT NULL,
 	inactive BOOLEAN NOT NULL,
 	comment TEXT,
 	FOREIGN KEY (crag_id) REFERENCES crags (id),
@@ -44,11 +50,11 @@ func (s *Setter) table() string {
 }
 
 func (s *Setter) keys() []string {
-	return []string{"crag_id", "name", "inactive", "comment"}
+	return []string{"crag_id", "name", "nickname", "country", "city", "inactive", "comment"}
 }
 
 func (s *Setter) values() []interface{} {
-	return []interface{}{s.CragId, s.Name, s.Inactive, s.Comment}
+	return []interface{}{s.CragId, s.Name, s.Nickname, s.Country, s.City, s.Inactive, s.Comment}
 }
 
 func (d *Database) DeleteSetter(id int64) {
@@ -65,6 +71,9 @@ func (d *Database) scanSetters(r *sql.Rows) []*Setter {
 			&s.Id,
 			&s.CragId,
 			&s.Name,
+			&s.Nickname,
+			&s.Country,
+			&s.City,
 			&s.Inactive,
 			&s.Comment,
 		)

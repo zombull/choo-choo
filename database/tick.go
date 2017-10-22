@@ -23,7 +23,6 @@ type Tick struct {
 	Lead     bool      `yaml:"lead"`
 	Falls    uint      `yaml:"false"`
 	Hangs    uint      `yaml:"hangs"`
-	Url      string    `yaml:"url"`
 	Comment  string    `yaml:"comment"`
 }
 
@@ -39,7 +38,6 @@ const FORMAT_TICK = `:
     Hangs:    %d
     Attempts: %d
     Sessions: %d
-    Url:      %s
     Comment:  %s
 `
 
@@ -60,7 +58,6 @@ CREATE TABLE IF NOT EXISTS ticks (
 	hangs INTEGER NOT NULL,
 	attempts INTEGER NOT NULL,
 	sessions INTEGER NOT NULL,
-	url TEXT,
 	comment TEXT,
 	FOREIGN KEY (route_id) REFERENCES routes (id),
 	FOREIGN KEY (area_id) REFERENCES areas (id),
@@ -85,11 +82,11 @@ func (t *Tick) table() string {
 }
 
 func (t *Tick) keys() []string {
-	return []string{"crag_id", "area_id", "route_id", "date", "grade", "stars", "lead", "redpoint", "flash", "onsight", "falls", "hangs", "attempts", "sessions", "url", "comment"}
+	return []string{"crag_id", "area_id", "route_id", "date", "grade", "stars", "lead", "redpoint", "flash", "onsight", "falls", "hangs", "attempts", "sessions", "comment"}
 }
 
 func (t *Tick) values() []interface{} {
-	return []interface{}{t.CragId, t.AreaId, t.RouteId, t.Date.Unix(), t.Grade, t.Stars, t.Lead, t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Url, t.Comment}
+	return []interface{}{t.CragId, t.AreaId, t.RouteId, t.Date.Unix(), t.Grade, t.Stars, t.Lead, t.Redpoint, t.Flash, t.Onsight, t.Falls, t.Hangs, t.Attempts, t.Sessions, t.Comment}
 }
 
 func (d *Database) scanTicks(r *sql.Rows) []*Tick {
@@ -97,14 +94,13 @@ func (d *Database) scanTicks(r *sql.Rows) []*Tick {
 
 	var ticks []*Tick
 	for r.Next() {
-		var date int64
 		t := Tick{}
 		err := r.Scan(
 			&t.Id,
 			&t.CragId,
 			&t.AreaId,
 			&t.RouteId,
-			&date,
+			&t.Date,
 			&t.Grade,
 			&t.Stars,
 			&t.Lead,
@@ -115,10 +111,8 @@ func (d *Database) scanTicks(r *sql.Rows) []*Tick {
 			&t.Hangs,
 			&t.Attempts,
 			&t.Sessions,
-			&t.Url,
 			&t.Comment,
 		)
-		t.Date = time.Unix(date, 0)
 		bug.OnError(err)
 		ticks = append(ticks, &t)
 	}

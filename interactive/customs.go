@@ -4,7 +4,6 @@ import (
 	"github.com/zombull/floating-castle/bug"
 	"github.com/zombull/floating-castle/customs"
 	"github.com/zombull/floating-castle/database"
-	"github.com/zombull/floating-castle/server"
 )
 
 func import_(d *database.Database) {
@@ -21,16 +20,13 @@ func import_(d *database.Database) {
 
 var xx struct{}
 
-func export(d *database.Database, s *server.Server) {
+func export(d *database.Database) {
 	m := database.Set{
-		"server": xx,
-		"file":   xx,
+		"file": xx,
 	}
 
 	t := getSet(m, "Export To")
-	if t == "server" {
-		s.Update(d)
-	} else {
+	if t == "file" {
 		bug.On(true, "file not yet implemented")
 	}
 }
