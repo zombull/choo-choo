@@ -1,0 +1,45 @@
+<md-content layout="row" layout-sm="column" layout-align="center" flex class="md-default-theme" ng-cloak>
+    <div ng-if="!error" style="padding-top:20px;">
+        <canvas id="problemCanvas" width="427" height="657"></canvas>
+    </div>
+    <span flex="10" ng-if="!error" hide-sm></span>
+    <div flex ng-if="problem && !error" style="padding-top:15px;">
+        <md-content layout="row" layout-align="center" flex ng-cloak>
+            <md-button class="md-raised" ng-click="ppage($event)">PREV {{::perpage}}</md-button>
+            <md-button class="md-raised" ng-click="prev($event)">PREV</md-button>
+            <md-button class="md-raised" ng-click="rand($event)">RAND</md-button>
+            <md-button class="md-raised" ng-click="next($event)">NEXT</md-button>
+            <md-button class="md-raised" ng-click="npage($event)">NEXT {{::perpage}}</md-button>
+        </md-content>
+
+        <md-subheader class="md-no-sticky md-accent" ng-cloak>
+            <h2 ng-if="!tick"><div><span ng-if="problem.b">&#x272a;&nbsp;</span>{{problem.n}}&nbsp;-&nbsp;{{problem.g}}</div></h2>
+            <h2 ng-if="tick"><div>&#x2739;&nbsp;<span ng-if="problem.b">&#x272a;&nbsp;</span>{{problem.n}}&nbsp;-&nbsp;{{tick.g}}</div></h2>
+            <md-divider></md-divider><br>
+
+            <table cellpadding="0" cellspacing="0">
+                <tbody>
+                    <tr><td valign="top">Setter</td><td ng-bind-html="setter | linkify"></td></tr>
+                    <tr ng-if="problem.d"><td valign="top">Date</td><td>{{problem.d}}</td></tr>
+                    <tr ng-if="tick"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(tick.s) track by $index">&#x2605;</span></td></tr>
+                    <tr ng-if="!tick && problem.s"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(problem.s) track by $index">&#x2605;</span></td></tr>
+                    <tr ng-if="!tick && !problem.s"><td valign="top">Stars</td><td>&#x2620;</td></tr>
+                    <tr ng-if="problem.a"><td valign="top">Ascents</td><td>{{problem.a}}</td></tr>
+                    <tr ng-if="!problem.a"><td valign="top">Ascents</td><td><span>&#x2620;</span></td></tr>
+                    <tr ng-if="tick"><td valign="top">Ticked</td><td>{{tick.d}}</td></tr>
+                    <tr ng-if="tick"><td valign="top">Attempts</td><td>{{tick.a}}</td></tr>
+                    <tr ng-if="tick && tick.e"><td valign="top">Sessions</td><td>{{tick.e}}</td></tr>
+                </tbody>
+            </table>
+        </md-subheader>
+
+        <md-subheader class="md-no-sticky md-accent" ng-if="list" ng-cloak>
+            <h2><div>Problems</div></h2>
+            <md-divider></md-divider><br>
+            <div>
+                <div ng-repeat="p in list track by p.u" ng-bind-html="p | linkify"></div>
+            </div>
+        </md-subheader>
+    </div>
+    <div class="layout" ng-if="error" ng-include="'partials/error.html'"></div>
+</md-content>
