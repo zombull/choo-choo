@@ -4,8 +4,8 @@ moon.factory('schema', function () {
     var requests = {};
 
     var subdomains = {};
-    var metadata = { master: { local: true } };
-    var checksums = { master: 'a6acf83c651d8a626eeacd3a5ccb3944' };
+    var metadata = { master: { local: true }, ticks: { local: true } };
+    var checksums = { master: 'a351c6feb5571519008677950b930cb7', ticks: 'a2be6d2b5d52bdc489fe96bdc7edb3e1' };
     
     return {
         requests: requests,

@@ -5,8 +5,6 @@ moon.factory('database', function (storage, schema) {
     'use strict';
 
     _.each(storage.checksums(), function(sum, key) {
-        console.log('key'+key)
-        console.log('sum'+sum)
         if (sum !== schema.checksums[key]) {
             storage.update(key);
         } else {
@@ -24,22 +22,25 @@ moon.factory('database', function (storage, schema) {
                     callback(null, null, null, { status: 404, data: 'The problem "' + name + '" does not exist.' });
                 }
                 else {
-                    var me = data.p[name];
-                    var problem = data.i[me];
-                    var setter = data.i[problem.e];
-                    var grades = data.g[problem.d / 10];
-                    var suggested = { setter: [], grade: [] }
-                    _.each(setter.p, function(p) {
-                        if (p != me && suggested.setter.length < 10) {
-                            suggested.setter.push(data.i[p])
-                        }
+                    storage.get('ticks', function(ticks) {
+                            var me = data.p[name];
+                            var problem = data.i[me];
+                            var setter = data.i[problem.e];
+                            var grades = data.g[problem.v / 10];
+                            var suggested = { setter: [], grade: [] }
+                            _.each(setter.p, function(p) {
+                                if (p != me && suggested.setter.length < 10 && !ticks.hasOwnProperty(p)) {
+                                    suggested.setter.push(data.i[p])
+                                }
+                            });
+                            _.each(grades, function(p) {
+                                if (p != me && (suggested.grade.length + suggested.setter.length) < 20 &&  !ticks.hasOwnProperty(p)) {
+                                    suggested.grade.push(data.i[p])
+                                }
+                            });
+                            var tick = ticks.hasOwnProperty(problem.i) ? ticks[problem.i] : null;
+                            callback(problem, setter, tick, suggested)
                     });
-                    _.each(grades, function(p) {
-                        if (p != me && (suggested.grade.length + suggested.setter.length) < 20) {
-                            suggested.grade.push(data.i[p])
-                        }
-                    });
-                    callback(problem, setter, suggested)
                 }
             });
         },
@@ -47,6 +48,9 @@ moon.factory('database', function (storage, schema) {
             storage.get('master', function(data) {
                 callback(data.img);
             });
+        },
+        ticks: function(callback) {
+            storage.get('ticks', callback);
         },
     };
 });

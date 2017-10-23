@@ -46,10 +46,10 @@ func newStore(root string) *KeyValueStore {
 			name := path.Join(dataDir, fi.Name())
 
 			if strings.HasSuffix(fi.Name(), ".json") {
-				s.data[strings.TrimSuffix(fi.Name(), ".json")], err = ioutil.ReadFile(name)
+				s.data[strings.Replace(strings.TrimSuffix(fi.Name(), ".json"), ".", ":", -1)], err = ioutil.ReadFile(name)
 				bug.OnError(err)
 			} else if strings.HasSuffix(fi.Name(), ".md5") {
-				s.sums[strings.TrimSuffix(fi.Name(), ".md5")], err = ioutil.ReadFile(name)
+				s.sums[strings.Replace(strings.TrimSuffix(fi.Name(), ".md5"), ".", ":", -1)], err = ioutil.ReadFile(name)
 				bug.OnError(err)
 			}
 		}
@@ -145,15 +145,15 @@ type moonEntry struct {
 	Url           string `json:"u"`
 	Name          string `json:"n"`
 	LowerCaseName string `json:"l"`
-	Date          string `json:"t,omitempty"`
+	Date          string `json:"d,omitempty"`
 	Nickname      string `json:"k,omitempty"`
-	Holds         holds  `json:"h,omitempty"`
+	Holds         *holds `json:"h,omitempty"`
 	Problems      []int  `json:"p,omitempty"`
 	Setter        int    `json:"e,omitempty"`
 	Grade         string `json:"g,omitempty"`
-	Difficulty    uint   `json:"d,omitempty"`
+	Difficulty    uint   `json:"v,omitempty"`
 	Stars         uint   `json:"s,omitempty"`
-	Id            uint   `json:"i,omitempty"` // Moonboard ID
+	Id            int    `json:"i,omitempty"`
 	Ascents       uint   `json:"a,omitempty"`
 	Benchmark     bool   `json:"b,omitempty"`
 	Comment       string `json:"c,omitempty"`
@@ -168,12 +168,13 @@ type moonData struct {
 }
 
 type moonTick struct {
-	Problem  int    `json:"p"`
-	Date     string `json:"d"`
-	Grade    string `json:"g"`
-	Stars    uint   `json:"s"`
-	Attempts uint   `json:"a"`
-	Sessions uint   `json:"e"`
+	Problem    int    `json:"p"`
+	Date       string `json:"d"`
+	Grade      string `json:"g"`
+	Difficulty uint   `json:"v"`
+	Stars      uint   `json:"s"`
+	Attempts   uint   `json:"a"`
+	Sessions   uint   `json:"e,omitempty"`
 }
 
 func getProblemUrl(s string) string {
@@ -208,6 +209,8 @@ func sortProblems(index []moonEntry, problems []int) {
 }
 
 func (s *KeyValueStore) update(d *database.Database) {
+	ticks := make(map[int]moonTick, 0)
+
 	setters := d.GetSetters(moonboard.Id(d))
 	bug.On(len(setters) == 0, fmt.Sprintf("No moonboard setters found: %d", moonboard.Id(d)))
 
@@ -238,7 +241,8 @@ func (s *KeyValueStore) update(d *database.Database) {
 			Problems:      make([]int, 0),
 		}
 		if _, ok := md.Setters[e.Url]; !ok {
-			md.Setters[e.Url] = len(md.Index)
+			e.Id = len(md.Index)
+			md.Setters[e.Url] = e.Id
 			md.Index = append(md.Index, e)
 		}
 	}
@@ -261,13 +265,14 @@ func (s *KeyValueStore) update(d *database.Database) {
 			Grade:         r.Grade,
 			Difficulty:    conversions[r.Grade],
 			Stars:         r.Stars,
-			Id:            r.Length,
+			Id:            i,
 			Ascents:       r.Pitches,
 			Benchmark:     r.Benchmark,
 			Comment:       r.Comment,
+			// MoonId:            r.Length,
 		}
 
-		e.Holds = holds{
+		e.Holds = &holds{
 			Start:        make([]string, 0),
 			Intermediate: make([]string, 0),
 			Finish:       make([]string, 0),
@@ -305,6 +310,22 @@ func (s *KeyValueStore) update(d *database.Database) {
 
 		bug.On((e.Difficulty/10) > 16, "Really, a V17?  Hello, Nalle!")
 		md.Grades[(e.Difficulty / 10)] = append(md.Grades[(e.Difficulty/10)], i)
+
+		t := d.GetTicks(r.Id)
+		if len(t) > 0 {
+			mt := moonTick{
+				Problem:    i,
+				Date:       t[0].Date.Format("January 02, 2006"),
+				Grade:      t[0].Grade,
+				Difficulty: conversions[t[0].Grade],
+				Stars:      t[0].Stars,
+				Attempts:   t[0].Attempts,
+			}
+			if t[0].Sessions > 0 {
+				mt.Sessions = t[0].Sessions
+			}
+			ticks[i] = mt
+		}
 	}
 
 	for i := nr; i < len(md.Index); i++ {
@@ -329,17 +350,24 @@ func (s *KeyValueStore) update(d *database.Database) {
 
 		md.Images[i] = base64.StdEncoding.EncodeToString(img)
 	}
+	dataDir := path.Join(s.dir, "data")
 
 	b, err := json.Marshal(md)
 	bug.OnError(err)
-
 	s.data["moonboard"] = b
 	s.sums["moonboard"] = checksum(b)
-
-	dataDir := path.Join(s.dir, "data")
 	err = ioutil.WriteFile(path.Join(dataDir, "moonboard.json"), b, 0644)
 	bug.OnError(err)
 	err = ioutil.WriteFile(path.Join(dataDir, "moonboard.md5"), checksum(b), 0644)
+	bug.OnError(err)
+
+	b, err = json.Marshal(ticks)
+	bug.OnError(err)
+	s.data["ticks:moonboard"] = b
+	s.sums["ticks:moonboard"] = checksum(b)
+	err = ioutil.WriteFile(path.Join(dataDir, "ticks.moonboard.json"), b, 0644)
+	bug.OnError(err)
+	err = ioutil.WriteFile(path.Join(dataDir, "ticks.moonboard.md5"), checksum(b), 0644)
 	bug.OnError(err)
 }
 
@@ -499,10 +527,10 @@ type betaEntry struct {
 
 //             addArea(cragUrl, areaName, area, isBoulder);
 //         }
-//         else if (isBoulder && (!crags[cragUrl].areas.bouldering || !crags[cragUrl].areas.bouldering.hasOwnProperty(areaName))) {
+//         else if (isBoulder && (!crags[cragUrl].areas.bouldering || !crags[cragUrl].areas.bouldering.zzzzzz(areaName))) {
 //             addArea(cragUrl, areaName, areas[areaUrl], isBoulder);
 //         }
-//         else if (!isBoulder && (!crags[cragUrl].areas.climbing || !crags[cragUrl].areas.climbing.hasOwnProperty(areaName))) {
+//         else if (!isBoulder && (!crags[cragUrl].areas.climbing || !crags[cragUrl].areas.climbing.zzzzzz(areaName))) {
 //             addArea(cragUrl, areaName, areas[areaUrl], isBoulder);
 //         }
 
@@ -537,7 +565,7 @@ type betaEntry struct {
 //             crags[cragUrl].subareas[subareaName] = subarea;
 //         }
 
-//         if (route.subarea && (!crags[cragUrl].subareas || !crags[cragUrl].subareas.hasOwnProperty(subareaName))) {
+//         if (route.subarea && (!crags[cragUrl].subareas || !crags[cragUrl].subareas.zzzzzz(subareaName))) {
 //             throw 'Duplicate Subarea: ' + JSON.stringify(route.subarea);
 //         }
 
@@ -575,7 +603,7 @@ type betaEntry struct {
 // });
 
 // function routeFilter(entry) {
-//     return entry.hasOwnProperty('grade');
+//     return entry.zzzzzz('grade');
 // }
 
 // function areaFilter(entry) {

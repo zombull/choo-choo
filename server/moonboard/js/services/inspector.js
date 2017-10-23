@@ -1,14 +1,23 @@
-moon.factory('inspector', function ($location, $q, database, calculator, grader) {
+moon.factory('inspector', function ($location, $q, database, calculator, grader, truther) {
     'use strict';
 
-    var filter = function(options, data) {
-        if (options.query || options.setter || options.grade || options.ascents || options.stars) {
+    var filter = function(options, data, ticks) {
+        if (options.query || options.setby || options.setter || options.grade ||
+            options.ascents || options.stars || options.benchmark !== null || options.ticked !== null) {
             options.query = options.query.replace(/^\s+/, '');
 
             return data.filter(function(entry) {
+                if (entry.n == 'Wuthering Heights') {
+                    console.log(entry.i);
+                    console.log(ticks[entry.i]);
+
+                }
                 return  (!options.query || entry.l.indexOf(options.query) !== -1) &&
-                        (!options.setter || entry.hasOwnProperty('e') && options.setter.hasOwnProperty(entry.e)) &&
-                        (!options.grade || entry.hasOwnProperty('d') && options.grade(entry.d)) &&
+                        (!options.setter || !entry.hasOwnProperty('g') && entry.l.indexOf(options.setter) !== -1) &&
+                        (!options.setby || entry.hasOwnProperty('e') && options.setby.hasOwnProperty(entry.e)) &&
+                        (!options.grade || entry.hasOwnProperty('v') && options.grade(entry.v)) &&
+                        (options.benchmark === null || entry.hasOwnProperty('b') === options.benchmark) &&
+                        (options.ticked === null && !ticks.hasOwnProperty(entry.i) || options.ticked || options.ticked === false && ticks.hasOwnProperty(entry.i)) &&
                         (!options.ascents || entry.hasOwnProperty('a') && options.ascents(entry.a)) &&
                         (!options.stars || entry.hasOwnProperty('s') && options.stars(entry.s));
             });
@@ -17,7 +26,8 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader)
     };
 
     var regExs = {
-        setter: /\s+@@(\w+)/,
+        setby: /\s+@@(\w+)/,
+        setter: /\s+@(\w+)/,
         grade: /\s+=(v1\d|v\d)/,
         minGrade: /\s+>(v1\d|v\d)/,
         maxGrade: /\s+<(v1\d|v\d)/,
@@ -27,6 +37,8 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader)
         stars: /\s+s=(\d+)/,
         minStars: /\s+s>(\d+)/,
         maxStars: /\s+s<(\d+)/,
+        benchmark: /\s+(\!|\\)b/,
+        ticked: /\s+(\!|\\)t/,
     };
 
     function processRegEx(options, regEx) {
@@ -46,6 +58,7 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader)
                 var min, max;
                 var options = { query: ' ' + query.toLowerCase() };
 
+                options.setby = processRegEx(options, regExs.setby);
                 options.setter = processRegEx(options, regExs.setter);
                 
                 min = max = processRegEx(options, regExs.grade);
@@ -75,17 +88,22 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader)
                     options.stars = calculator(min, max);
                 }
 
+                options.benchmark = truther(processRegEx(options, regExs.benchmark));
+                options.ticked = truther(processRegEx(options, regExs.ticked));
+
                 database.raw(function(data) {
-                    if (options.setter) {
-                        var setter = options.setter;
-                        options.setter = {}
-                        _.each(data.s, function(id, key) {
-                            if (key.indexOf(setter) !== -1) {
-                                options.setter[id] = true;
-                            }
-                        });
-                    }
-                    deferred.resolve(filter(options, data.i));
+                    database.ticks(function(ticks) {
+                        if (options.setby) {
+                            var setby = options.setby;
+                            options.setby = {}
+                            _.each(data.s, function(id, key) {
+                                if (key === '' || key.indexOf(setby) !== -1) {
+                                    options.setby[id] = true;
+                                }
+                            });
+                        }
+                        deferred.resolve(filter(options, data.i, ticks));
+                    });
                 });
             }
             else {

@@ -5,17 +5,23 @@
     <span flex="10" hide-sm></span>
     <div flex ng-if="problem && !error">
         <md-subheader class="md-no-sticky md-accent" ng-cloak>
-            <h2><div>{{::problem.n}}&nbsp;-&nbsp;{{::problem.g}}<span ng-if="problem.b">&nbsp;&#x272a;</span></div></h2>
+            <h2 ng-if="!tick"><div><span ng-if="problem.b">&#x272a;&nbsp;</span>{{::problem.n}}&nbsp;-&nbsp;{{::problem.g}}</div></h2>
+            <h2 ng-if="tick"><div>&#x2739;&nbsp;<span ng-if="problem.b">&#x272a;&nbsp;</span>{{::problem.n}}&nbsp;-&nbsp;{{::tick.g}}</div></h2>
             <md-divider></md-divider><br>
 
             <table cellpadding="0" cellspacing="0">
                 <tbody>
                     <tr><td valign="top">Setter</td><td ng-bind-html="::setter | linkify"></td></tr>
-                    <tr ng-if="problem.t"><td valign="top">Date</td><td>{{problem.t}}</td></tr>
-                    <tr ng-if="problem.s"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(problem.s) track by $index">&#x2605;</span></td></tr>
-                    <tr ng-if="!problem.s"><td valign="top">Stars</td><td>&#x2620;</td></tr>
+                    <tr ng-if="problem.d"><td valign="top">Date</td><td>{{problem.d}}</td></tr>
+                    <tr ng-if="tick"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(tick.s) track by $index">&#x2605;</span></td></tr>
+                    <tr ng-if="!tick && problem.s"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(problem.s) track by $index">&#x2605;</span></td></tr>
+                    <tr ng-if="!tick && !problem.s"><td valign="top">Stars</td><td>&#x2620;</td></tr>
                     <tr ng-if="problem.a"><td valign="top">Ascents</td><td>{{::problem.a}}</td></tr>
                     <tr ng-if="!problem.a"><td valign="top">Ascents</td><td><span>&#x2620;</span></td></tr>
+                    <tr ng-if="tick"><td valign="top">Ticked</td><td>{{tick.d}}</td></tr>
+                    <tr ng-if="tick"><td valign="top">Attempts</td><td>{{::tick.a}}</td></tr>
+                    <tr ng-if="tick && tick.e"><td valign="top">Sessions</td><td>{{::tick.e}}</td></tr>
+
                 </tbody>
             </table>
         </md-subheader>
