@@ -7,11 +7,6 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader,
             options.query = options.query.replace(/^\s+/, '');
 
             return data.filter(function(entry) {
-                if (entry.n == 'Wuthering Heights') {
-                    console.log(entry.i);
-                    console.log(ticks[entry.i]);
-
-                }
                 return  (!options.query || entry.l.indexOf(options.query) !== -1) &&
                         (!options.setter || !entry.hasOwnProperty('g') && entry.l.indexOf(options.setter) !== -1) &&
                         (!options.setby || entry.hasOwnProperty('e') && options.setby.hasOwnProperty(entry.e)) &&
