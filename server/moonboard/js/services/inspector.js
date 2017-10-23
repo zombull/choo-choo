@@ -91,24 +91,26 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader,
                 options.benchmark = truther(processRegEx(options, regExs.benchmark));
                 options.ticked = truther(processRegEx(options, regExs.ticked));
 
-                database.raw(function(data) {
-                    database.ticks(function(ticks) {
-                        if (options.setby) {
-                            var setby = options.setby;
-                            options.setby = {}
-                            _.each(data.s, function(id, key) {
-                                if (key === '' || key.indexOf(setby) !== -1) {
-                                    options.setby[id] = true;
-                                }
-                            });
-                        }
-                        deferred.resolve(filter(options, data.i, ticks));
-                    });
+                database.all(function(data, ticks, error) {
+                    if (options.setby) {
+                        var setby = options.setby;
+                        options.setby = {}
+                        _.each(data.s, function(id, key) {
+                            if (key === '' || key.indexOf(setby) !== -1) {
+                                options.setby[id] = true;
+                            }
+                        });
+                    }
+                    deferred.resolve(filter(options, data.i, ticks));
                 });
             }
             else {
-                database.raw(function(data) {
-                    deferred.resolve(data.i);
+                database.master(function(data, error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        deferred.resolve(data.i);
+                    }
                 });
             }
             return deferred.promise;

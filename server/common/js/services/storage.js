@@ -170,9 +170,8 @@ host.factory('storage', function ($http, $q, schema) {
                     },
                     function(error) {
                         if (error) {
-                            callback(null);
-                        }
-                        else{
+                            callback(null, error);
+                        } else {
                             doUpdate(name, callback);
                         }
                     }

@@ -12,45 +12,36 @@ moon.factory('database', function (storage, schema) {
         }
     });
 
+    function doCallback(scope, callback, data, error) {
+        if (error) {
+            if (scope) {
+                scope.error = scope.error || error;
+            } else {
+                console.log(error);
+            }
+        } else {
+            callback(data);
+        }
+    }
+
     return {
-        raw: function(callback) {
-            storage.get('master', callback);
+        all: function(callback, scope) {
+            storage.get('master', doCallback.bind(this, scope, function(data) {
+                storage.get('ticks', doCallback.bind(this, scope, function(ticks, error) {
+                    callback(data, ticks);
+                }));
+            }));
         },
-        problem: function(name, callback) {
-            storage.get('master', function(data) {
-                if (!data.p.hasOwnProperty(name)) {
-                    callback(null, null, null, { status: 404, data: 'The problem "' + name + '" does not exist.' });
-                }
-                else {
-                    storage.get('ticks', function(ticks) {
-                            var me = data.p[name];
-                            var problem = data.i[me];
-                            var setter = data.i[problem.e];
-                            var grades = data.g[problem.v / 10];
-                            var suggested = { setter: [], grade: [] }
-                            _.each(setter.p, function(p) {
-                                if (p != me && suggested.setter.length < 10 && !ticks.hasOwnProperty(p)) {
-                                    suggested.setter.push(data.i[p])
-                                }
-                            });
-                            _.each(grades, function(p) {
-                                if (p != me && (suggested.grade.length + suggested.setter.length) < 20 &&  !ticks.hasOwnProperty(p)) {
-                                    suggested.grade.push(data.i[p])
-                                }
-                            });
-                            var tick = ticks.hasOwnProperty(problem.i) ? ticks[problem.i] : null;
-                            callback(problem, setter, tick, suggested)
-                    });
-                }
-            });
+        master: function(callback, scope) {
+            storage.get('master', doCallback.bind(this, scope, callback));
         },
-        images: function(callback) {
-            storage.get('master', function(data) {
+        images: function(callback, scope) {
+            storage.get('master', doCallback.bind(this, scope, function(data) {
                 callback(data.img);
-            });
+            }));
         },
-        ticks: function(callback) {
-            storage.get('ticks', callback);
+        ticks: function(callback, scope) {
+            storage.get('ticks', doCallback.bind(this, scope, callback));
         },
     };
 });
