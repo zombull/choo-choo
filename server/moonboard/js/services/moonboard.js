@@ -260,6 +260,11 @@ moon.factory('moonboard', function ($http, $q, $document, database) {
             return loaded.promise;
         },
         set: function(holds) {
+            _.each(borders, function(border) {
+                border.parent.removeChild(border);
+            });
+            borders = [];
+
             setHolds(holds.s, "rgba(0,0,0,1)");
             setHolds(holds.i, "rgba(255,57,0,1)");
             setHolds(holds.f, "rgba(0,0,0,1)");
