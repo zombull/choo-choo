@@ -34,9 +34,10 @@ moon.controller('PeruseController', function PeruseController($timeout, $scope, 
 
     database.all(function(data, ticks) {
         $scope.data = data;
+        var end = _.size(data.p);
         // Build the master list of all problems for the current grade.
-        _.each(data.p, function(index) {
-            if (!grade || data.i[index].g === grade) {
+        _.each(data.i, function(problem, index) {
+            if (index < end && (!grade || problem.g === grade)) {
                 if (/*include ticks || */ !ticks.hasOwnProperty(index)) {
                     $scope.problems.push(index);
                 }
@@ -51,7 +52,7 @@ moon.controller('PeruseController', function PeruseController($timeout, $scope, 
                 update(Math.min($scope.i, $scope.problems.length - 1));
             },
             function() {
-                $scope.error = $scope.error || { status: 500, data: 'Failed to load Moonboard' };
+                $scope.error = $scope.error || { status: 500, da2ta: 'Failed to load Moonboard' };
             }
         );
     }, $scope);
@@ -71,7 +72,7 @@ moon.controller('PeruseController', function PeruseController($timeout, $scope, 
     }
 
     $scope.ppage = function (event) {
-        update(Math.min($scope.i + $scope.perpage, $scope.problems.length - 1));
+        update(Math.max($scope.i - $scope.perpage, 0));
     };
     $scope.prev = function (event) {
         if ($scope.i > 0) {
@@ -87,6 +88,6 @@ moon.controller('PeruseController', function PeruseController($timeout, $scope, 
         }
     };
     $scope.npage = function (event) {
-        update(Math.max($scope.i - $scope.perpage, 0));
+        update(Math.min($scope.i + $scope.perpage, $scope.problems.length - 1));
     };
 });

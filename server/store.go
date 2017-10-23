@@ -189,25 +189,6 @@ func getSetterUrl(s string) string {
 	return "s/" + url.PathEscape(sanitize(s))
 }
 
-func sortProblems(index []moonEntry, problems []int) {
-	sort.Slice(problems, func(i, j int) bool {
-		p1 := index[problems[i]]
-		p2 := index[problems[j]]
-
-		// Note that the return is inverted from what might be expected
-		// by a "Less" function, as we effectively want a reverse sort,
-		// e.g. higher stars and ascents at the front of the list.
-		if p1.Ascents < 50 && p2.Ascents > 200 || p1.Ascents < 50 && p2.Ascents > 100 && p2.Stars > 1 {
-			return false
-		} else if p1.Ascents > 200 && p2.Ascents < 50 || p1.Ascents > 100 && p2.Ascents < 50 && p1.Stars > 1 {
-			return true
-		} else if p1.Stars == p2.Stars {
-			return p1.Ascents > p2.Ascents
-		}
-		return p1.Stars > p2.Stars
-	})
-}
-
 func (s *KeyValueStore) update(d *database.Database) {
 	ticks := make(map[int]moonTick, 0)
 
@@ -248,7 +229,22 @@ func (s *KeyValueStore) update(d *database.Database) {
 	}
 
 	sort.Slice(routes, func(i, j int) bool {
-		return strings.ToLower(routes[i].Name) < strings.ToLower(routes[j].Name)
+		p1 := routes[i]
+		p2 := routes[j]
+
+		// Note that the return is inverted from what might be expected
+		// by a "Less" function, as we effectively want a reverse sort,
+		// e.g. higher stars and ascents at the front of the list.  And
+		// don't forget that Pitches is actualy Ascents, we're sorting
+		// routes from the database, not the Moonboard specific problems.
+		if p1.Pitches < 50 && p2.Pitches > 200 || p1.Pitches < 50 && p2.Pitches > 100 && p2.Stars > 1 {
+			return false
+		} else if p1.Pitches > 200 && p2.Pitches < 50 || p1.Pitches > 100 && p2.Pitches < 50 && p1.Stars > 1 {
+			return true
+		} else if p1.Stars == p2.Stars {
+			return p1.Pitches > p2.Pitches
+		}
+		return p1.Stars > p2.Stars
 	})
 
 	for i, r := range routes {
@@ -326,14 +322,6 @@ func (s *KeyValueStore) update(d *database.Database) {
 			}
 			ticks[i] = mt
 		}
-	}
-
-	for i := nr; i < len(md.Index); i++ {
-		sortProblems(md.Index, md.Index[i].Problems)
-	}
-
-	for i := range md.Grades {
-		sortProblems(md.Index, md.Grades[i])
 	}
 
 	imgDir := path.Join(s.dir, "moonboard", "img")
