@@ -24,6 +24,16 @@ body{
     line-height: 48px;
 }
 
+@media screen and (max-width: 960px) {
+    #problemCanvasContainer {
+        text-align: center;
+    }
+}
+
+.md-button {
+    min-width: 56px;
+}
+
 h2 {
     font-size: 1.4rem;
     line-height: 1.1em;
