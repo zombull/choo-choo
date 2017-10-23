@@ -14,7 +14,6 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
 
         var me = data.p[name];
         var problem = data.i[me];
-        var tick = ticks.hasOwnProperty(problem.i) ? ticks[problem.i] : null;
         var setter = data.i[problem.e];
         var grades = data.g[problem.v / 10];
         var suggested = { setter: [], grade: [] }
@@ -30,7 +29,7 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
         });
         $scope.setter = setter;
         $scope.problem = problem;
-        $scope.tick = tick;
+        $scope.tick = ticks.hasOwnProperty(problem.i) ? ticks[problem.i] : null;
         $scope.suggested = suggested;
         
         moonboard.load().then(
