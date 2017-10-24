@@ -87,7 +87,6 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
                 options.ticked = truther(processRegEx(options, regExs.ticked));
 
                 database.all(function(data, ticks, error) {
-                    console.log(ticks);
                     if (options.setby) {
                         var setby = options.setby;
                         options.setby = {}
