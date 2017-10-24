@@ -57,12 +57,12 @@ a {
     text-decoration: none;
 }
 
-a:not(#index) {
+a:not(#index):not(.inv), a.inv:hover {
     color: #00EFDE;
     /* color: rgb(3,169,244); crux */
 }
 
-.red, a:not(#index):hover, #index:hover {
+.red, a.inv, a:not(#index):not(.inv):hover, #index:hover {
     color: #FF3900;
     /* color: rgb(255,110,64); // crux */
 }

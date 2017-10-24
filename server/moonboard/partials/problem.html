@@ -11,7 +11,7 @@
 
             <table cellpadding="0" cellspacing="0">
                 <tbody>
-                    <tr><td valign="top">Setter</td><td ng-bind-html="::setter | linkify"></td></tr>
+                    <tr><td valign="top">Setter</td><td>{{::setter.n}}</td></tr>
                     <tr ng-if="problem.d"><td valign="top">Date</td><td>{{::problem.d}}</td></tr>
                     <tr ng-if="tick"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(tick.s) track by $index">&#x2605;</span></td></tr>
                     <tr ng-if="!tick && problem.s"><td valign="top">Stars</td><td><span ng-repeat="s in [].constructor(problem.s) track by $index">&#x2605;</span></td></tr>
@@ -27,7 +27,7 @@
         </md-subheader>
 
         <md-subheader class="md-no-sticky md-accent" ng-cloak>
-            <h2><div>{{::setter.n}}<span ng-if="setter.k">&nbsp;({{::setter.k}})</span></div></h2>
+            <h2><a  class="inv" ng-href="{{::setter.u}}">{{::setter.n}}<span ng-if="setter.k">&nbsp;({{::setter.k}})</span></a></h2>
             <md-divider></md-divider><br>
             <div>
                 <div ng-repeat="p in ::suggested.setter track by p.u" ng-bind-html="::p | linkify"></div>
@@ -35,7 +35,7 @@
         </md-subheader>
 
         <md-subheader class="md-no-sticky md-accent" ng-cloak>
-            <h2><div>Suggested {{::problem.g}}s</div></h2>
+            <h2><a class="inv" ng-href="/p/{{::problem.g}}">{{::problem.g}}s</a></h2>
             <md-divider></md-divider><br>
             <div>
                 <div ng-repeat="p in ::suggested.grade track by p.u" ng-bind-html="::p | linkify"></div>
