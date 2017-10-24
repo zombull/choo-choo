@@ -10,9 +10,6 @@ moon.factory('problems', function () {
         set: function(p) {
             problems = p;
         },
-        push: function(p) {
-            problems.push(p);
-        },
         reset: function() {
             problems = [];
         }

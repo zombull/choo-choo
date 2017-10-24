@@ -5,6 +5,8 @@
 moon.controller('ProblemController', function ProblemController($scope, $routeParams, moonboard, database, problems) {
     'use strict';
 
+    problems.reset();
+
     database.all(function(data, ticks) {
         var name = $routeParams.problem;
         if (!data.p.hasOwnProperty(name)) {
