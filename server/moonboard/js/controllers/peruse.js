@@ -13,7 +13,6 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
     $scope.i = 0; // Current index into __problems
 
     var __data = {}; // The global data list, needed to retrieve setter info.
-    var __ticks = {}; // The global data list, needed to retrieve setter info.
     var __problems = []; // Local list used as the source for problems.
     var perpage = 15;
 
@@ -37,15 +36,14 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         }
     }
 
-    database.all(function(data, ticks) {
+    database.all(function(data) {
         __data = data;
-        __ticks = ticks;
 
         // Build the master list of all problems for the current grade.
         var end = _.size(data.p);
         _.each(data.i, function(problem, i) {
             if (i < end && (!grade || problem.g === grade)) {
-                // if (settings.showTicks || !ticks.hasOwnProperty(i)) {
+                // if (settings.showTicks || !problem.t) {
                     __problems.push(problem);
                 // }
             }
@@ -71,8 +69,7 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         $scope.problem = __problems[$scope.i];
         moonboard.set($scope.problem.h);
         $scope.setter = __data.i[$scope.problem.e];
-        $scope.tick = __ticks.hasOwnProperty($scope.problem.i) ? __ticks[$scope.problem.i] : null;
-        
+
         $scope.list = [];
         var start = Math.min($scope.i, __problems.length - perpage - 1);
         $scope.list = _.slice(__problems, start, start + perpage);

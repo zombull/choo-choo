@@ -9,12 +9,10 @@ moon.controller('SetterController', function SetterController($scope, $routePara
 
     $scope.problem = null;
     $scope.setter = null;
-    $scope.tick = null;
     $scope.list = [];
     $scope.i = 0; // Current index into __problems
 
     var __problems = []; // Local list used as the source for problems.
-    var __ticks = [];
     var perpage = 15;
 
     if ($routeParams.page) {
@@ -26,9 +24,7 @@ moon.controller('SetterController', function SetterController($scope, $routePara
         $scope.i = $routeParams.page * perpage;
     }
 
-    database.all(function(data, ticks) {
-        __ticks = ticks;
-
+    database.all(function(data) {
         var skey = 's/' + $routeParams.setter.toLowerCase();
         if (!data.s.hasOwnProperty(skey)) {
             $scope.error = $scope.error || { status: 404, data: 'Did not find a setter matching "' + $routeParams.setter + '"' };
@@ -39,8 +35,8 @@ moon.controller('SetterController', function SetterController($scope, $routePara
 
         // Build the master list of all problems for the current grade.
         _.each($scope.setter.p, function(i) {
-            // if (settings.showTicks || !ticks.hasOwnProperty(i)) {
-                __problems.push(data.i[i])
+            // if (settings.showTicks || !data.i[i].t) {
+                __problems.push(data.i[i]);
             // }
         });
         if (__problems.length === 0) {
@@ -63,7 +59,6 @@ moon.controller('SetterController', function SetterController($scope, $routePara
         $scope.i = i;
         $scope.problem = __problems[$scope.i];
         moonboard.set($scope.problem.h);
-        $scope.tick = __ticks.hasOwnProperty($scope.problem.i) ? __ticks[$scope.problem.i] : null;
 
         $scope.list = [];
         var start = Math.min($scope.i, __problems.length - perpage - 1);

@@ -24,24 +24,40 @@ moon.factory('database', function (storage, schema) {
         }
     }
 
+    var __data = null;
+
     return {
         all: function(callback, scope) {
-            storage.get('master', doCallback.bind(this, scope, function(data) {
-                storage.get('ticks', doCallback.bind(this, scope, function(ticks, error) {
-                    callback(data, ticks);
+            if (__data) {
+                callback(__data);
+            } else {
+                storage.get('master', doCallback.bind(this, scope, function(data) {
+                    storage.get('ticks', doCallback.bind(this, scope, function(ticks, error) {
+                        __data = data;
+
+                         // Unpack tick info into problems.
+                        var end = _.size(__data.p);
+                        _.each(__data.i, function(problem, i) {
+                            __data.i[i].t = ticks.hasOwnProperty(i) ? ticks[i] : null;
+                        });
+                        callback(__data);
+                    }));
                 }));
-            }));
-        },
-        master: function(callback, scope) {
-            storage.get('master', doCallback.bind(this, scope, callback));
+            }
         },
         images: function(callback, scope) {
             storage.get('master', doCallback.bind(this, scope, function(data) {
                 callback(data.img);
             }));
         },
-        ticks: function(callback, scope) {
-            storage.get('ticks', doCallback.bind(this, scope, callback));
-        },
+        setters: function(callback, scope) {
+            if (__data) {
+                callback(__data.s);
+            } else {
+                storage.get('master', doCallback.bind(this, scope, function(data) {
+                    callback(data.s);
+                }));
+            }
+        }
     };
 });

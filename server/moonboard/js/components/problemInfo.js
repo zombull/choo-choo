@@ -3,6 +3,5 @@ moon.component('problemInfo', {
     bindings: {
         problem: '=',
         setter: '=',
-        tick: '='
     }
 });

@@ -16,9 +16,9 @@ host.filter('linkify', function($sce) {
                 stars += '&#x2620;';
             }
         }
+        var ticked = entry.hasOwnProperty('t') && entry.t ? '&#x2739;&nbsp;' : '';
         var benchmark = entry.hasOwnProperty('b') && entry.b ? '&#x272a;&nbsp;' : '';
-        // var html = '<a href="{0}"{3}>{5}{1}{2}{4}</a>'.format(entry.u, entry.n, meta, target, stars, benchmark);
-        var html = '<a href="{0}"{1}>{2}{3}{4}{5}</a>'.format(entry.u, target, benchmark, entry.n, meta, stars, );
+        var html = '<a href="{0}"{1}>{2}{3}{4}{5}{6}</a>'.format(entry.u, target, ticked, benchmark, entry.n, meta, stars);
         return $sce.trustAsHtml(html);
     };
 });

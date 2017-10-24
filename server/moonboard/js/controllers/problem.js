@@ -7,7 +7,7 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
 
     problems.reset();
 
-    database.all(function(data, ticks) {
+    database.all(function(data) {
         var name = $routeParams.problem;
         if (!data.p.hasOwnProperty(name)) {
             $scope.error = $scope.error || { status: 404, data: 'The problem "' + name + '" does not exist.' };
@@ -21,18 +21,17 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
         var grades = data.g[problem.v / 10];
         var suggested = { setter: [], grade: [] }
         _.each(setter.p, function(p) {
-            if (p != me && suggested.setter.length < 10 && !ticks.hasOwnProperty(p)) {
+            if (p != me && suggested.setter.length < 10 && (/* settings.showTicks || */ !data.i[p].t)) {
                 suggested.setter.push(data.i[p])
             }
         });
         _.each(grades, function(p) {
-            if (p != me && (suggested.grade.length + suggested.setter.length) < 20 &&  !ticks.hasOwnProperty(p)) {
-                suggested.grade.push(data.i[p])
+            if (p != me && (suggested.grade.length + suggested.setter.length) < 20 && (/* settings.showTicks || */ !data.i[p].t)) {
+                suggested.grade.push(data.i[p]);
             }
         });
         $scope.setter = setter;
         $scope.problem = problem;
-        $scope.tick = ticks.hasOwnProperty(problem.i) ? ticks[problem.i] : null;
         $scope.suggested = suggested;
         
         moonboard.load().then(
