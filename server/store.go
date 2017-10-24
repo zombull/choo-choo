@@ -145,6 +145,7 @@ type moonEntry struct {
 	Url           string `json:"u"`
 	Name          string `json:"n"`
 	LowerCaseName string `json:"l"`
+	Id            int    `json:"i"` // index into moonData, not database ID or moonboard ID
 	Date          string `json:"d,omitempty"`
 	Nickname      string `json:"k,omitempty"`
 	Holds         *holds `json:"h,omitempty"`
@@ -153,7 +154,6 @@ type moonEntry struct {
 	Grade         string `json:"g,omitempty"`
 	Difficulty    uint   `json:"v,omitempty"`
 	Stars         uint   `json:"s,omitempty"`
-	Id            int    `json:"i,omitempty"`
 	Ascents       uint   `json:"a,omitempty"`
 	Benchmark     bool   `json:"b,omitempty"`
 	Comment       string `json:"c,omitempty"`
