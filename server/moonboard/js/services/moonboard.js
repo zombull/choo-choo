@@ -1,7 +1,7 @@
 /**
  * Service for interacting with the actual board.
 */
-moon.factory('moonboard', function ($http, $q, $document, database) {
+moon.factory('moonboard', function ($q, $document, database) {
     'use strict';
 
     var board = {
