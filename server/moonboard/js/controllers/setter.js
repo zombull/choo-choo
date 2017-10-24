@@ -2,19 +2,19 @@
 /**
  *
  */
-moon.controller('PeruseController', function PeruseController($scope, $routeParams, moonboard, database, problems) {
+moon.controller('SetterController', function SetterController($scope, $routeParams, moonboard, database, problems) {
     'use strict';
 
     problems.reset();
 
     $scope.problem = null;
     $scope.setter = null;
+    $scope.tick = null;
     $scope.list = [];
     $scope.i = 0; // Current index into __problems
 
-    var __data = {}; // The global data list, needed to retrieve setter info.
-    var __ticks = {}; // The global data list, needed to retrieve setter info.
     var __problems = []; // Local list used as the source for problems.
+    var __ticks = [];
     var perpage = 15;
 
     if ($routeParams.page) {
@@ -26,29 +26,22 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         $scope.i = $routeParams.page * perpage;
     }
 
-    var grade = $routeParams.grade.toUpperCase();
-    if (grade === 'ALL') {
-        grade = false;
-    } else {
-        var vgrade = parseInt(grade.substring(1));
-        if (grade.substring(0, 1) !== 'V' || isNaN(vgrade) || vgrade < 4 || vgrade > 17) {
-            $scope.error = $scope.error || { status: 404, data: '"' + $routeParams.grade + '" is not a valid grade: must be V4-V17 or ALL.' };
-            return;
-        }
-    }
-
     database.all(function(data, ticks) {
-        __data = data;
         __ticks = ticks;
 
+        var skey = 's/' + $routeParams.setter.toLowerCase();
+        if (!data.s.hasOwnProperty(skey)) {
+            $scope.error = $scope.error || { status: 404, data: 'Did not find a setter matching "' + $routeParams.setter + '"' };
+            return;
+        }
+
+        $scope.setter = data.i[data.s[skey]];
+
         // Build the master list of all problems for the current grade.
-        var end = _.size(data.p);
-        _.each(data.i, function(problem, i) {
-            if (i < end && (!grade || problem.g === grade)) {
-                // if (settings.showTicks || !ticks.hasOwnProperty(i)) {
-                    __problems.push(problem);
-                // }
-            }
+        _.each($scope.setter.p, function(i) {
+            // if (settings.showTicks || !ticks.hasOwnProperty(i)) {
+                __problems.push(data.i[i])
+            // }
         });
         if (__problems.length === 0) {
             $scope.error = $scope.error || { status: 404, data: 'Did not find any ' + $routeParams.grade + ' problems.' };
@@ -70,9 +63,8 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         $scope.i = i;
         $scope.problem = __problems[$scope.i];
         moonboard.set($scope.problem.h);
-        $scope.setter = __data.i[$scope.problem.e];
         $scope.tick = __ticks.hasOwnProperty($scope.problem.i) ? __ticks[$scope.problem.i] : null;
-        
+
         $scope.list = [];
         var start = Math.min($scope.i, __problems.length - perpage - 1);
         $scope.list = _.slice(__problems, start, start + perpage);
