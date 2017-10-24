@@ -2,7 +2,7 @@
 /**
  *
  */
-moon.controller('PeruseController', function PeruseController($timeout, $scope, $routeParams, moonboard, database) {
+moon.controller('PeruseController', function PeruseController($timeout, $scope, $routeParams, moonboard, database, problems) {
     'use strict';
 
     $scope.problem = null;
@@ -34,12 +34,15 @@ moon.controller('PeruseController', function PeruseController($timeout, $scope, 
 
     database.all(function(data, ticks) {
         $scope.data = data;
-        var end = _.size(data.p);
+
         // Build the master list of all problems for the current grade.
+        problems.reset();
+        var end = _.size(data.p);
         _.each(data.i, function(problem, index) {
             if (index < end && (!grade || problem.g === grade)) {
                 if (/*include ticks || */ !ticks.hasOwnProperty(index)) {
                     $scope.problems.push(index);
+                    problems.push(problem);
                 }
             }
         });

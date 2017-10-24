@@ -2,7 +2,7 @@
 /**
  *
  */
-moon.controller('ProblemController', function ProblemController($scope, $routeParams, moonboard, database) {
+moon.controller('ProblemController', function ProblemController($scope, $routeParams, moonboard, database, problems) {
     'use strict';
 
     database.all(function(data, ticks) {
@@ -11,6 +11,7 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
             $scope.error = $scope.error || { status: 404, data: 'The problem "' + name + '" does not exist.' };
             return;
         }
+        problems.set(data.i);
 
         var me = data.p[name];
         var problem = data.i[me];

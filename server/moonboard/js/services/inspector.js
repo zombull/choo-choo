@@ -1,12 +1,12 @@
-moon.factory('inspector', function ($location, $q, database, calculator, grader, truther) {
+moon.factory('inspector', function ($location, $q, database, problems, calculator, grader, truther) {
     'use strict';
 
-    var filter = function(options, data, ticks) {
+    var filter = function(options, index, ticks) {
         if (options.query || options.setby || options.setter || options.grade ||
             options.ascents || options.stars || options.benchmark !== null || options.ticked !== null) {
             options.query = options.query.replace(/^\s+/, '');
 
-            return data.filter(function(entry) {
+            return index.filter(function(entry) {
                 return  (!options.query || entry.l.indexOf(options.query) !== -1) &&
                         (!options.setter || !entry.hasOwnProperty('g') && entry.l.indexOf(options.setter) !== -1) &&
                         (!options.setby || entry.hasOwnProperty('e') && options.setby.hasOwnProperty(entry.e)) &&
@@ -17,7 +17,7 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader,
                         (!options.stars || entry.hasOwnProperty('s') && options.stars(entry.s));
             });
         }
-        return data;
+        return index;
     };
 
     var regExs = {
@@ -87,6 +87,7 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader,
                 options.ticked = truther(processRegEx(options, regExs.ticked));
 
                 database.all(function(data, ticks, error) {
+                    console.log(ticks);
                     if (options.setby) {
                         var setby = options.setby;
                         options.setby = {}
@@ -96,17 +97,11 @@ moon.factory('inspector', function ($location, $q, database, calculator, grader,
                             }
                         });
                     }
-                    deferred.resolve(filter(options, data.i, ticks));
+                    deferred.resolve(filter(options, problems.get(), ticks));
                 });
             }
             else {
-                database.master(function(data, error) {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        deferred.resolve(data.i);
-                    }
-                });
+                deferred.resolve(problems.get());
             }
             return deferred.promise;
         },
