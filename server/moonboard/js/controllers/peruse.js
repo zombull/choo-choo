@@ -40,13 +40,9 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         __data = data;
 
         // Build the master list of all problems for the current grade.
-        var end = _.size(data.p);
-        _.each(data.i, function(problem, i) {
-            if (i < end && (!grade || problem.g === grade)) {
-                // if (settings.showTicks || !problem.t) {
-                    __problems.push(problem);
-                // }
-            }
+        __problems = _.slice(data.i, 0, _.size(data.p)).filter(function(problem) {
+            return  (!grade || problem.g === grade) &&
+                    (true || settings.showTicks || !problem.t);
         });
         if (__problems.length === 0) {
             $scope.error = $scope.error || { status: 404, data: 'Did not find any ' + $routeParams.grade + ' problems.' };
@@ -70,9 +66,13 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
         moonboard.set($scope.problem.h);
         $scope.setter = __data.i[$scope.problem.e];
 
-        $scope.list = [];
-        var start = Math.min($scope.i, __problems.length - perpage - 1);
-        $scope.list = _.slice(__problems, start, start + perpage);
+        if (__problems.length > perpage) {
+            $scope.list = [];
+            var start = Math.min($scope.i, __problems.length - perpage - 1);
+            $scope.list = _.slice(__problems, start, start + perpage);
+        } else {
+            $scope.list = __problems;
+        }
     }
 
     $scope.ppage = function (event) {

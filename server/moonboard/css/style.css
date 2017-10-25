@@ -24,6 +24,13 @@ body{
     line-height: 48px;
 }
 
+.atc-link {
+    font-family: 'V5 Bloques', Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 28px;
+    line-height: 28px;
+    letter-spacing: 0.080em;
+}
+
 @media screen and (max-width: 960px) {
     #problemCanvasContainer {
         text-align: center;
@@ -62,7 +69,7 @@ a:not(#index):not(.inv), a.inv:hover {
     /* color: rgb(3,169,244); crux */
 }
 
-.red, a.inv, a:not(#index):not(.inv):hover, #index:hover {
+a.inv, a:not(#index):not(.inv):hover, #index:hover {
     color: #FF3900;
     /* color: rgb(255,110,64); // crux */
 }
@@ -72,27 +79,27 @@ a:not(#index):not(.inv), a.inv:hover {
     padding-right: 2em;
 }
 
-.help h2, .help h3 {
+.atc h2, .atc h3 {
     margin-bottom: .5em;
 }
 
-.help .md-subheader-inner {
+.atc .md-subheader-inner {
     padding-bottom: .5em;
 }
 
-.help .md-subheader-content :not(h2):not(h3) {
+/* .atc .md-subheader-content :not(h2):not(h3) {
     color: rgba(0, 0, 0, 0.87);
     margin-top: 0;
-}
+} */
 
-.help .md-subheader-content {
+/* .atc .md-subheader-content {
     font-weight: 400;
-}
+} */
 
-.help pre {
+.atc pre {
     display: inline;
 }
 
-.help p code {
+.atc p code {
     background: rgba(0, 0, 0, 0.0666);
 }

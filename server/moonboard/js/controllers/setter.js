@@ -33,7 +33,6 @@ moon.controller('SetterController', function SetterController($scope, $routePara
 
         $scope.setter = data.i[data.s[skey]];
 
-        // Build the master list of all problems for the current grade.
         _.each($scope.setter.p, function(i) {
             // if (settings.showTicks || !data.i[i].t) {
                 __problems.push(data.i[i]);
@@ -60,9 +59,13 @@ moon.controller('SetterController', function SetterController($scope, $routePara
         $scope.problem = __problems[$scope.i];
         moonboard.set($scope.problem.h);
 
-        $scope.list = [];
-        var start = Math.min($scope.i, __problems.length - perpage - 1);
-        $scope.list = _.slice(__problems, start, start + perpage);
+        if (__problems.length > perpage) {
+            $scope.list = [];
+            var start = Math.min($scope.i, __problems.length - perpage - 1);
+            $scope.list = _.slice(__problems, start, start + perpage);
+        } else {
+            $scope.list = __problems;
+        }
     }
 
     $scope.ppage = function (event) {

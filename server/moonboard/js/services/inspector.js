@@ -1,46 +1,60 @@
-moon.factory('inspector', function ($location, $q, database, problems, calculator, grader, truther) {
+moon.factory('inspector', function ($location, $q, database, problems, calculator, grader, truthiness) {
     'use strict';
 
     var filter = function(options, index) {
-        if (options.query || options.setby || options.setter || options.grade ||
-            options.ascents || options.stars || options.benchmark !== null || options.ticked !== null) {
-            options.query = options.query.replace(/^\s+/, '');
+        if (options.benchmark !== null || options.ticked !== null || options.grade || options.ascents ||
+            options.stars || options.query || options.setby || options.setter) {
 
+            options.query = options.query.replace(/^\s+/, '');
             return index.filter(function(entry) {
-                return  (!options.query || entry.l.indexOf(options.query) !== -1) &&
-                        (!options.setter || !entry.hasOwnProperty('g') && entry.l.indexOf(options.setter) !== -1) &&
-                        (!options.setby || entry.hasOwnProperty('e') && options.setby.hasOwnProperty(entry.e)) &&
-                        (!options.grade || entry.hasOwnProperty('v') && options.grade(entry.v)) &&
-                        (options.benchmark === null || entry.hasOwnProperty('b') === options.benchmark) &&
+                /*
+                 * Short circuit employed, keep less expensive operations early
+                 * and move more expensive operations to the end, i.e. boolean
+                 * checks first, string checks last.
+                 */
+                return  (options.benchmark === null || entry.hasOwnProperty('b') === options.benchmark) &&
                         (options.ticked === null || (entry.t !== null) === options.ticked) &&
-                        (!options.ascents || entry.hasOwnProperty('a') && options.ascents(entry.a)) &&
-                        (!options.stars || entry.hasOwnProperty('s') && options.stars(entry.s));
+                        (!options.grade || options.grade(entry.v)) &&
+                        (!options.ascents || options.ascents(entry.a)) &&
+                        (!options.stars || options.stars(entry.s)) &&
+                        (!options.setby || options.setby.hasOwnProperty(entry.e)) &&
+                        (!options.query || entry.l.indexOf(options.query) !== -1);
+            });
+        }
+        return index;
+    };
+
+    var filterSetters = function(options, index) {
+        if (options.query) {
+            options.query = options.query.replace(/^\s+/, '');
+            return index.filter(function(entry) {
+                return (entry.l.indexOf(options.query) !== -1);
             });
         }
         return index;
     };
 
     var regExs = {
-        setby: /\s+@@(\w+)/,
-        setter: /\s+@(\w+)/,
-        grade: /\s+=(v1\d|v\d)/,
+        benchmark: /\s+(\!|@)b/,
+        ticked: /\s+(\!|@)t/,
+        setby: /\s+(\!|@)s\s?(\w+)/,
+        setter: /\s+(@)e/,
+        grade: /\s+(?:g=|@)(v1\d|v\d)/,
         minGrade: /\s+>(v1\d|v\d)/,
         maxGrade: /\s+<(v1\d|v\d)/,
-        ascents: /\s+a=(\d+)/,
+        ascents: /\s+(?:a=|@a)(\d+)/,
         minAscents: /\s+a>(\d+)/,
         maxAscents: /\s+a<(\d+)/,
-        stars: /\s+s=(\d+)/,
+        stars: /\s+(?:a=|@s)(\d+)/,
         minStars: /\s+s>(\d+)/,
         maxStars: /\s+s<(\d+)/,
-        benchmark: /\s+(\!|\\)b/,
-        ticked: /\s+(\!|\\)t/,
     };
 
     function processRegEx(options, regEx) {
         var match = options.query.match(regEx);
         if (match) {
             options.query = options.query.replace(regEx, '');
-            return match[1].toLowerCase();
+            return match[1].toLowerCase() + (match[2] ? match[2].toLowerCase() : '');
         }
         return null;
     }
@@ -53,9 +67,11 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
                 var min, max;
                 var options = { query: ' ' + query.toLowerCase() };
 
-                options.setby = processRegEx(options, regExs.setby);
-                options.setter = processRegEx(options, regExs.setter);
-                
+                options.benchmark = truthiness(processRegEx(options, regExs.benchmark));
+                options.ticked = truthiness(processRegEx(options, regExs.ticked));
+                options.setby = truthiness(processRegEx(options, regExs.setby));
+                options.setter = truthiness(processRegEx(options, regExs.setter));
+
                 min = max = processRegEx(options, regExs.grade);
                 if (!min) {
                     min = processRegEx(options, regExs.minGrade);
@@ -83,15 +99,21 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
                     options.stars = calculator(min, max);
                 }
 
-                options.benchmark = truther(processRegEx(options, regExs.benchmark));
-                options.ticked = truther(processRegEx(options, regExs.ticked));
-
-                if (options.setby) {
-                    database.setters(function(setters, error) {
+                if (options.setter) {
+                    database.setters(function(setters) {
+                        deferred.resolve(filterSetters(options, setters));
+                    });
+                } else if (options.setby) {
+                    database.setterIds(function(setters) {
+                        // Build an object whose properties are setter ids.
+                        // Filter will check a problem's setter ID against
+                        // the object's properties.  @key below is the URL
+                        // of the setter, i.e. /s/<name> minus spaces and
+                        // lowercased.
                         var setby = options.setby;
                         options.setby = {}
                         _.each(setters, function(id, key) {
-                            if (key === '' || key.indexOf(setby) !== -1) {
+                            if ((key.indexOf(setby.v) !== -1) === setby.b) {
                                 options.setby[id] = true;
                             }
                         });

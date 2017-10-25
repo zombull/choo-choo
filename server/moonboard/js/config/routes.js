@@ -7,7 +7,8 @@ moon.config(function($routeProvider, $locationProvider) {
     $routeProvider.caseInsensitiveMatch = true;
     $routeProvider
     .when('/', {
-        templateUrl: 'partials/help.html'
+        templateUrl: 'partials/atc.html',
+        controller: 'AirTrafficController as ctrl'
     })
     .when('/p/:grade/:page?', {
         templateUrl: 'partials/peruse.html',

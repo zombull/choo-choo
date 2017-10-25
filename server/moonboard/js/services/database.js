@@ -52,6 +52,15 @@ moon.factory('database', function (storage, schema) {
         },
         setters: function(callback, scope) {
             if (__data) {
+                callback(_.slice(__data.i, _.size(__data.p)));
+            } else {
+                storage.get('master', doCallback.bind(this, scope, function(data) {
+                    callback(_.slice(data.i, _.size(data.p)));
+                }));
+            }
+        },
+        setterIds: function(callback, scope) {
+            if (__data) {
                 callback(__data.s);
             } else {
                 storage.get('master', doCallback.bind(this, scope, function(data) {
