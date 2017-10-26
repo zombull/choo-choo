@@ -39,7 +39,7 @@ moon.factory('database', function ($q, bug, grades, storage, schema) {
                     if (i < end) {
                         problem.t = ticks.hasOwnProperty(i) ? ticks[i] : null;
                         problem.g = problem.t ? problem.t.g : problem.g;
-                        problem.s = problem.t ? problem.t.s : problem.s;
+                        problem.s = (problem.t && problem.t.s) ? problem.t.s : problem.s;
                         problem.v = grades.convert(problem.g);
 
                         bug.on((problem.v/10) > 17, "Really, a V18?  Hello, Nalle!")
