@@ -393,6 +393,38 @@ func SyncProblems(d *database.Database, data []byte) {
 	}
 }
 
+var attempts = map[string]uint{
+	"ACG23":                   25,
+	"Mark's Favorite Problem": 50,
+}
+
+var sessions = map[string]uint{
+	"ACG23":                   5,
+	"Mark's Favorite Problem": 10,
+}
+
+var stars = map[string]uint{
+	"Saltedblocks 2":          5,
+	"Tca Comp 1":              5,
+	"Left Jab":                5,
+	"Hard Times":              5,
+	"Kang Mina":               5,
+	"ACG24":                   5,
+	"46":                      5,
+	"Intimissimi #2":          5,
+	"ACG58":                   5,
+	"The Famous Five":         5,
+	"Problem 9":               5,
+	"Air Force":               5,
+	"ACG23":                   5,
+	"Kicker":                  5,
+	"Wills Var":               5,
+	"Austroraptor":            5,
+	"2 Hours Of Purity Ring":  5,
+	"5 Finger Discount":       5,
+	"Mark's Favorite Problem": 5,
+}
+
 func SyncTicks(d *database.Database, data []byte) {
 	cragId := Id(d)
 	setId := SetId(d)
@@ -417,17 +449,23 @@ func SyncTicks(d *database.Database, data []byte) {
 			Redpoint: true,
 		}
 
-		if ui, ok := regexParseUint(attemptsRegex, t.Comment, true); ok {
+		if ui, ok := attempts[route.Name]; ok {
+			tick.Attempts = ui
+		} else if ui, ok := regexParseUint(attemptsRegex, t.Comment, true); ok {
 			tick.Attempts = ui
 		} else {
 			tick.Attempts, ok = triesToAttempts[t.NumberOfTries]
 			bug.On(!ok, fmt.Sprintf("Unhandled case in 'Number of tries': %s", t.NumberOfTries))
 
 		}
-		if ui, ok := regexParseUint(sessionsRegex, t.Comment, true); ok {
+		if ui, ok := sessions[route.Name]; ok {
+			tick.Sessions = ui
+		} else if ui, ok := regexParseUint(sessionsRegex, t.Comment, true); ok {
 			tick.Sessions = ui
 		}
-		if ui, ok := regexParseUint(starsRegex, t.Comment, true); ok {
+		if ui, ok := stars[route.Name]; ok {
+			tick.Stars = ui
+		} else if ui, ok := regexParseUint(starsRegex, t.Comment, true); ok {
 			tick.Stars = ui
 		}
 		if s, ok := regexFindGroup(commentRegex, t.Comment); ok {
