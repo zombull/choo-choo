@@ -68,10 +68,9 @@ func (s *Server) Run(port string) {
 	moon := echo.New()
 	s.commonRoutes(moon, "moonboard")
 	moon.File("/:problem", path.Join(s.dir, "moonboard", "index.html"))
-	moon.File("/p/:grade", path.Join(s.dir, "moonboard", "index.html"))
-	moon.File("/p/:grade/:page", path.Join(s.dir, "moonboard", "index.html"))
-	moon.File("/s/:setter", path.Join(s.dir, "moonboard", "index.html"))
-	moon.File("/s/:setter/:page", path.Join(s.dir, "moonboard", "index.html"))
+	for _, r := range []string{"/p/:grade", "/t/:grade", "/s/:grade", "/st/:grade"} {
+		moon.File(r, path.Join(s.dir, "moonboard", "index.html"))
+	}
 
 	echoes := map[string]*echo.Echo{
 		"beta": beta,

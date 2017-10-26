@@ -2,18 +2,17 @@
 /**
  *
  */
-moon.controller('SetterController', function SetterController($scope, $routeParams, moonboard, database, problems) {
+moon.controller('SetterController', function SetterController($scope, $location, $routeParams, moonboard, database, problems) {
     'use strict';
 
     problems.reset();
 
     $scope.problem = null;
-    $scope.setter = null;
-    $scope.list = [];
     $scope.i = 0; // Current index into __problems
 
     var __problems = []; // Local list used as the source for problems.
     var perpage = 15;
+    var showTicks = ($location.path().split('/')[1].toLowerCase() === 'st');
 
     if ($routeParams.page) {
         var page = parseInt($routeParams.page);
@@ -34,15 +33,17 @@ moon.controller('SetterController', function SetterController($scope, $routePara
         $scope.setter = data.i[data.s[skey]];
 
         _.each($scope.setter.p, function(i) {
-            // if (settings.showTicks || !data.i[i].t) {
+            if (!showTicks == !data.i[i].t) {
                 __problems.push(data.i[i]);
-            // }
+            }
         });
         if (__problems.length === 0) {
-            $scope.error = $scope.error || { status: 404, data: 'Did not find any ' + $routeParams.grade + ' problems.' };
+            bug.on(!showTicks);
+            $scope.error = $scope.error || { status: 404, data: 'Did not find any ticked problems set by ' + $routeParams.setter + '.' };
             return;
         }
         problems.set(__problems);
+        $scope.count = __problems.length;
 
         moonboard.load().then(
             function() {

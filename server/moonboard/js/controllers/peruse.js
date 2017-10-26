@@ -2,19 +2,18 @@
 /**
  *
  */
-moon.controller('PeruseController', function PeruseController($scope, $routeParams, moonboard, database, problems) {
+moon.controller('PeruseController', function PeruseController($scope, $location, $routeParams, moonboard, database, problems) {
     'use strict';
 
     problems.reset();
 
     $scope.problem = null;
-    $scope.setter = null;
-    $scope.list = [];
     $scope.i = 0; // Current index into __problems
 
     var __data = {}; // The global data list, needed to retrieve setter info.
     var __problems = []; // Local list used as the source for problems.
     var perpage = 15;
+    var showTicks = ($location.path().split('/')[1].toLowerCase() === 't');
 
     if ($routeParams.page) {
         var page = parseInt($routeParams.page);
@@ -41,14 +40,14 @@ moon.controller('PeruseController', function PeruseController($scope, $routePara
 
         // Build the master list of all problems for the current grade.
         __problems = _.slice(data.i, 0, _.size(data.p)).filter(function(problem) {
-            return  (!grade || problem.g === grade) &&
-                    (true || settings.showTicks || !problem.t);
+            return  (!grade || problem.g === grade) && (!showTicks == !problem.t);
         });
         if (__problems.length === 0) {
             $scope.error = $scope.error || { status: 404, data: 'Did not find any ' + $routeParams.grade + ' problems.' };
             return;
         }
         problems.set(__problems);
+        $scope.count = __problems.length;
 
         moonboard.load().then(
             function() {

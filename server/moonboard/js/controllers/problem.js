@@ -21,12 +21,12 @@ moon.controller('ProblemController', function ProblemController($scope, $routePa
         var grades = data.g[problem.v / 10];
         var suggested = { setter: [], grade: [] }
         _.each(setter.p, function(p) {
-            if (p != me && suggested.setter.length < 10 && (/* settings.showTicks || */ !data.i[p].t)) {
+            if (p != me && suggested.setter.length < 10 && !data.i[p].t) {
                 suggested.setter.push(data.i[p])
             }
         });
         _.each(grades, function(p) {
-            if (p != me && (suggested.grade.length + suggested.setter.length) < 20 && (/* settings.showTicks || */ !data.i[p].t)) {
+            if (p != me && (suggested.grade.length + suggested.setter.length) < 20 && !data.i[p].t) {
                 suggested.grade.push(data.i[p]);
             }
         });
