@@ -101,7 +101,11 @@ func sanitize(s string) string {
 	if strings.HasPrefix(s, "ACG") {
 		return s
 	}
-	return strings.Title(strings.ToLower(s))
+	s = strings.Title(strings.ToLower(s))
+	for k, v := range map[string]string{"'Ll": "'ll", "I'M": "I'm", "I'V": "I'v", "'S": "'s", "'T": "'t", "u'R": "u'r"} {
+		s = strings.Replace(s, k, v, -1)
+	}
+	return s
 }
 
 var countries = map[string]string{
