@@ -96,8 +96,8 @@ host.factory('grades', function () {
     return {
         compare: function(min, max) {
             if ((!min || min[0] === 'v') && (!max || max[0] === 'v')) {
-                min = min ? convert(min, true) : conversions.VB;
-                max = max ? convert(max, false) : conversions.V20;
+                min = min ? convert(min.toUpperCase(), true) : conversions.VB;
+                max = max ? convert(max.toUpperCase(), false) : conversions.V20;
             }
             else if ((!min || min[0] === '5') && (!max || max[0] === '5')) {
                 min = min ? convert(min, true) : conversions['3rd Class'];

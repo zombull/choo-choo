@@ -39,7 +39,7 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
         ticked: /\s+(\!|@)t/,
         setby: /\s+(\!|@)y\s?(\w+)/,
         setter: /\s+(@)e/,
-        grade: /\s+(?:g=|@)(v1\d|v\d)/,
+        grade: /\s+(?:=|@)(v1\d|v\d)/,
         minGrade: /\s+>(v1\d|v\d)/,
         maxGrade: /\s+<(v1\d|v\d)/,
         ascents: /\s+(?:a=|@a)(\d+)/,
