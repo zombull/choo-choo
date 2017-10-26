@@ -1,72 +1,86 @@
 /**
  * Service for making queries to the database.
 */
-moon.factory('database', function (storage, schema) {
+moon.factory('database', function ($q, bug, grades, storage, schema) {
     'use strict';
+
+    var update = false;
+    var __data = $q.defer();
 
     _.each(storage.checksums(), function(sum, key) {
         if (sum !== schema.checksums[key]) {
             storage.update(key);
+            update = true;
         } else {
             storage.get(key, function() { });
         }
     });
 
-    function doCallback(scope, callback, data, error) {
+
+    function getStorage(callback, data, error) {
         if (error) {
-            if (scope) {
-                scope.error = scope.error || error;
-            } else {
-                console.log(error);
-            }
+            __data.reject(error);
         } else {
             callback(data);
         }
     }
 
-    var __data = null;
+    storage.get('master', getStorage.bind(this, function(data) {
+        storage.get('ticks', getStorage.bind(this, function(ticks) {
+            if (!data.hasOwnProperty('g') || update) {
+                data.g = []
+                for (var g = 0; g < 18; g++) {
+                    data.g[g] = [];
+                }                
+                // Unpack difficulty and tick info into problems, then update
+                // storage.
+                var end = _.size(data.p);
+                _.each(data.i, function(problem, i) {
+                    if (i < end) {
+                        problem.t = ticks.hasOwnProperty(i) ? ticks[i] : null;
+                        problem.g = problem.t ? problem.t.g : problem.g;
+                        problem.v = grades.convert(problem.g);
+
+                        bug.on((problem.v/10) > 17, "Really, a V18?  Hello, Nalle!")
+                        data.g[problem.v/10].push(i);
+                    }
+                });
+            }
+            storage.set('master', data);
+            __data.resolve(data);
+        }));
+    }));
+
+    var getData = function(scope, callback) {
+        __data.promise.then(
+            function(data) {
+                callback(data);
+            },
+            function(error) {
+                scope.error = scope.error || error;    
+            }
+        );
+    };
 
     return {
         all: function(callback, scope) {
-            if (__data) {
-                callback(__data);
-            } else {
-                storage.get('master', doCallback.bind(this, scope, function(data) {
-                    storage.get('ticks', doCallback.bind(this, scope, function(ticks, error) {
-                        __data = data;
+            getData(scope, callback);
 
-                         // Unpack tick info into problems.
-                        var end = _.size(__data.p);
-                        _.each(__data.i, function(problem, i) {
-                            __data.i[i].t = ticks.hasOwnProperty(i) ? ticks[i] : null;
-                        });
-                        callback(__data);
-                    }));
-                }));
-            }
         },
         images: function(callback, scope) {
-            storage.get('master', doCallback.bind(this, scope, function(data) {
+            getData(scope, function(data) {
                 callback(data.img);
-            }));
+            });
         },
         setters: function(callback, scope) {
-            if (__data) {
-                callback(_.slice(__data.i, _.size(__data.p)));
-            } else {
-                storage.get('master', doCallback.bind(this, scope, function(data) {
-                    callback(_.slice(data.i, _.size(data.p)));
-                }));
-            }
+            getData(scope, function(data) {
+                callback(_.slice(data.i, _.size(data.p)));
+            });
         },
         setterIds: function(callback, scope) {
-            if (__data) {
-                callback(__data.s);
-            } else {
-                storage.get('master', doCallback.bind(this, scope, function(data) {
-                    callback(data.s);
-                }));
-            }
+            getData(scope, function(data) {
+                callback(data.s);
+            });
         }
     };
 });

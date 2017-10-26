@@ -152,7 +152,6 @@ type moonEntry struct {
 	Problems      []int  `json:"p,omitempty"`
 	Setter        int    `json:"e,omitempty"`
 	Grade         string `json:"g,omitempty"`
-	Difficulty    uint   `json:"v,omitempty"`
 	Stars         uint   `json:"s,omitempty"`
 	Ascents       uint   `json:"a,omitempty"`
 	Benchmark     bool   `json:"b,omitempty"`
@@ -163,18 +162,16 @@ type moonData struct {
 	Index    []moonEntry    `json:"i"`
 	Problems map[string]int `json:"p"`
 	Setters  map[string]int `json:"s"`
-	Grades   [17][]int      `json:"g"`
 	Images   []string       `json:"img"`
 }
 
 type moonTick struct {
-	Problem    int    `json:"p"`
-	Date       string `json:"d"`
-	Grade      string `json:"g"`
-	Difficulty uint   `json:"v"`
-	Stars      uint   `json:"s"`
-	Attempts   uint   `json:"a"`
-	Sessions   uint   `json:"e,omitempty"`
+	Problem  int    `json:"p"`
+	Date     string `json:"d"`
+	Grade    string `json:"g"`
+	Stars    uint   `json:"s"`
+	Attempts uint   `json:"a"`
+	Sessions uint   `json:"e,omitempty"`
 }
 
 func getProblemUrl(s string) string {
@@ -204,13 +201,6 @@ func (s *KeyValueStore) update(d *database.Database) {
 		Problems: make(map[string]int),
 		Setters:  make(map[string]int),
 		Images:   make([]string, 150),
-	}
-	for i := range md.Grades {
-		if i >= 4 && i <= 10 {
-			md.Grades[i] = make([]int, 0, 100)
-		} else {
-			md.Grades[i] = make([]int, 0)
-		}
 	}
 
 	for _, r := range setters {
@@ -259,7 +249,6 @@ func (s *KeyValueStore) update(d *database.Database) {
 			Date:          r.Date.Format("January 02, 2006"),
 			Setter:        setter,
 			Grade:         r.Grade,
-			Difficulty:    conversions[r.Grade],
 			Stars:         r.Stars,
 			Id:            i,
 			Ascents:       r.Pitches,
@@ -304,18 +293,14 @@ func (s *KeyValueStore) update(d *database.Database) {
 		md.Index[i] = e
 		md.Index[setter].Problems = append(md.Index[setter].Problems, i)
 
-		bug.On((e.Difficulty/10) > 16, "Really, a V17?  Hello, Nalle!")
-		md.Grades[(e.Difficulty / 10)] = append(md.Grades[(e.Difficulty/10)], i)
-
 		t := d.GetTicks(r.Id)
 		if len(t) > 0 {
 			mt := moonTick{
-				Problem:    i,
-				Date:       t[0].Date.Format("January 02, 2006"),
-				Grade:      t[0].Grade,
-				Difficulty: conversions[t[0].Grade],
-				Stars:      t[0].Stars,
-				Attempts:   t[0].Attempts,
+				Problem:  i,
+				Date:     t[0].Date.Format("January 02, 2006"),
+				Grade:    t[0].Grade,
+				Stars:    t[0].Stars,
+				Attempts: t[0].Attempts,
 			}
 			if t[0].Sessions > 0 {
 				mt.Sessions = t[0].Sessions

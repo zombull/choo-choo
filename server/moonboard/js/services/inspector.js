@@ -1,4 +1,4 @@
-moon.factory('inspector', function ($location, $q, database, problems, calculator, grader, truthiness) {
+moon.factory('inspector', function ($location, $q, database, problems, calculator, grades, truthiness) {
     'use strict';
 
     var filter = function(options, index) {
@@ -78,7 +78,7 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
                     max  = processRegEx(options, regExs.maxGrade);
                 }
                 if (min || max) {
-                    options.grade = grader(min, max);
+                    options.grade = grades.compare(min, max);
                 }
 
                 min = max = processRegEx(options, regExs.ascents);

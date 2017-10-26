@@ -1,4 +1,4 @@
-host.factory('storage', function ($http, $q, schema) {
+host.factory('storage', function ($http, $q, bug, schema) {
     'use strict';
 
     // The iframe may not be listening for our first event, even if we wait until onload,
@@ -18,9 +18,9 @@ host.factory('storage', function ($http, $q, schema) {
                 };
                 subdomain.postMessage('pong');
             },
-            function() {
+            function(error) {
                 // Completely hosed if the ping is rejected.
-                console.log('fudge');
+                bug.bug(error);
             }
         );
     });
@@ -59,9 +59,9 @@ host.factory('storage', function ($http, $q, schema) {
                 function(source) {
                     schema.subdomains[subdomain].postMessage(message);
                 },
-                function() {
+                function(error) {
                     // Completely hosed if the ping is somehow rejected.
-                    console.log('fudge');
+                    bug.bug(error);
                 }
             );
         }
@@ -113,11 +113,6 @@ host.factory('storage', function ($http, $q, schema) {
         }
     };
 
-    // Testing without schema.subdomains, e.g. on phone.
-    // _.each(schema.metadata, function(entry) {
-    //     entry.local = true;
-    // });
-
     var cache = {
         data: {},
         checksums: JSON.parse(localStorage.getItem('checksums')) || { },
@@ -129,6 +124,9 @@ host.factory('storage', function ($http, $q, schema) {
         // stale data from local storage.
         if (update || !cache.data.hasOwnProperty(name)) {
             cache.data[name] = value;
+            if (update) {
+                  substorage.set(name, JSON.stringify(value));
+            }
         }
 
         if (update || !cache.checksums.hasOwnProperty(name)) {
@@ -144,7 +142,6 @@ host.factory('storage', function ($http, $q, schema) {
         $http.get('data/' + name + '?version=' + cache.checksums[name]).then(
             function(response) {
                 deposit(name, response.data, true);
-                substorage.set(name, JSON.stringify(response.data));
                 callback(response.data);
             },
             function(response) {
@@ -177,6 +174,9 @@ host.factory('storage', function ($http, $q, schema) {
                     }
                 );
             }
+        },
+        set: function(name, data) {
+            deposit(name, data, true);
         },
         update: function(name) {
             doUpdate(name, function() { });
