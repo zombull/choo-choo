@@ -37,7 +37,7 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
     var regExs = {
         benchmark: /\s+(\!|@)b/,
         ticked: /\s+(\!|@)t/,
-        setby: /\s+(\!|@)s\s?(\w+)/,
+        setby: /\s+(\!|@)y\s?(\w+)/,
         setter: /\s+(@)e/,
         grade: /\s+(?:g=|@)(v1\d|v\d)/,
         minGrade: /\s+>(v1\d|v\d)/,
@@ -45,7 +45,7 @@ moon.factory('inspector', function ($location, $q, database, problems, calculato
         ascents: /\s+(?:a=|@a)(\d+)/,
         minAscents: /\s+a>(\d+)/,
         maxAscents: /\s+a<(\d+)/,
-        stars: /\s+(?:a=|@s)(\d+)/,
+        stars: /\s+(?:s=|@s)(\d+)/,
         minStars: /\s+s>(\d+)/,
         maxStars: /\s+s<(\d+)/,
     };
